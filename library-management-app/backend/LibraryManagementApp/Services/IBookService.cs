@@ -1,11 +1,13 @@
+using LibraryManagementApp.Models;
+
 namespace LibraryManagementApp.Services
 {
     public interface IBookService
     {
-        IEnumerable<Book> GetAllBooks();
-        Book GetBookById(int id);
-        void AddBook(Book book);
-        void UpdateBook(Book book);
-        void DeleteBook(int id);
+        Task<IEnumerable<Book>> GetAllBooksAsync();
+        Task<Book> GetBookByIdAsync(Guid id);
+        Task AddBookAsync(Book book);
+        Task UpdateBookAsync(Book book);
+        Task DeleteBookAsync(Guid id);
     }
 }

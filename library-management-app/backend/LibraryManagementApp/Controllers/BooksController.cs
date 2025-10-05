@@ -25,7 +25,7 @@ namespace LibraryManagementApp.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Book>> GetBookById(int id)
+        public async Task<ActionResult<Book>> GetBookById(Guid id)
         {
             var book = await _bookService.GetBookByIdAsync(id);
             if (book == null)
@@ -38,12 +38,12 @@ namespace LibraryManagementApp.Controllers
         [HttpPost]
         public async Task<ActionResult<Book>> CreateBook(Book book)
         {
-            var createdBook = await _bookService.AddBookAsync(book);
-            return CreatedAtAction(nameof(GetBookById), new { id = createdBook.Id }, createdBook);
+            await _bookService.AddBookAsync(book);
+            return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBook(int id, Book book)
+        public async Task<IActionResult> UpdateBook(Guid id, Book book)
         {
             if (id != book.Id)
             {
@@ -51,14 +51,14 @@ namespace LibraryManagementApp.Controllers
             }
 
             await _bookService.UpdateBookAsync(book);
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBook(int id)
+        public async Task<IActionResult> DeleteBook(Guid id)
         {
             await _bookService.DeleteBookAsync(id);
-            return NoContent();
+            return Ok();
         }
     }
 }

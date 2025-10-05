@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using LibraryManagementApp.Models;
+using LibraryManagementApp.Data;
 
 namespace LibraryManagementApp.Repositories
 {
@@ -13,29 +15,29 @@ namespace LibraryManagementApp.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Book>> GetAllBooks()
+        public async Task<IEnumerable<Book>> GetAllBooksAsync()
         {
             return await _context.Books.ToListAsync();
         }
 
-        public async Task<Book> GetBookById(int id)
+        public async Task<Book> GetBookByIdAsync(Guid id)
         {
             return await _context.Books.FindAsync(id);
         }
 
-        public async Task AddBook(Book book)
+        public async Task AddBookAsync(Book book)
         {
             await _context.Books.AddAsync(book);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateBook(Book book)
+        public async Task UpdateBookAsync(Book book)
         {
             _context.Books.Update(book);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteBook(int id)
+        public async Task DeleteBookAsync(Guid id)
         {
             var book = await _context.Books.FindAsync(id);
             if (book != null)

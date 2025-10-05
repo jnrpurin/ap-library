@@ -13,29 +13,29 @@ namespace LibraryManagementApp.Services
             _bookRepository = bookRepository;
         }
 
-        public IEnumerable<Book> GetAllBooks()
+        public async Task<IEnumerable<Book>> GetAllBooksAsync()
         {
-            return _bookRepository.GetAllBooks();
+            return await _bookRepository.GetAllBooksAsync();
         }
 
-        public Book GetBookById(int id)
+        public async Task<Book> GetBookByIdAsync(Guid id)
         {
-            return _bookRepository.GetBookById(id);
+            return await _bookRepository.GetBookByIdAsync(id);
         }
 
-        public void AddBook(Book book)
+        public async Task AddBookAsync(Book book)
         {
-            _bookRepository.AddBook(book);
+            await _bookRepository.AddBookAsync(book);
         }
 
-        public void UpdateBook(Book book)
+        public async Task UpdateBookAsync(Book book)
         {
-            _bookRepository.UpdateBook(book);
+            await _bookRepository.UpdateBookAsync(book);
         }
 
-        public void DeleteBook(int id)
+        public async Task DeleteBookAsync(Guid id)
         {
-            _bookRepository.DeleteBook(id);
+            await _bookRepository.DeleteBookAsync(id);
         }
     }
 }
