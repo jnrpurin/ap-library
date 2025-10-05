@@ -1,0 +1,34 @@
+.book-list-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.book-list-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.book-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.book-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.book-title {
+    font-weight: bold;
+}
+
+.book-author {
+    color: #555;
+}
+
+.loading, .error {
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+    margin-top: 20px;
+}
