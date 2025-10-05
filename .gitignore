@@ -23,6 +23,15 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# Visual Studio / VS Code local settings
+.vs/
+.vscode/
+
+# Configs
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+
 # .NET Core
 project.lock.json
 project.fragment.lock.json
