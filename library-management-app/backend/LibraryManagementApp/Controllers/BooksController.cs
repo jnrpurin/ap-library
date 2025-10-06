@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using LibraryManagementApp.Models;
 using LibraryManagementApp.Services;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace LibraryManagementApp.Controllers
 {
+    /// <summary>
+    /// API controller for managing books in the library.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class BooksController : ControllerBase
@@ -17,6 +18,10 @@ namespace LibraryManagementApp.Controllers
             _bookService = bookService;
         }
 
+        /// <summary>
+        /// Method to get all books.
+        /// </summary>
+        /// <returns>A list of all books saved</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
@@ -24,6 +29,11 @@ namespace LibraryManagementApp.Controllers
             return Ok(books);
         }
 
+        /// <summary>
+        /// Method to get a book by its ID.
+        /// </summary>
+        /// <param name="id">Book identification</param>
+        /// <returns>A book information</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Book>> GetBookById(Guid id)
         {
@@ -35,6 +45,11 @@ namespace LibraryManagementApp.Controllers
             return Ok(book);
         }
 
+        /// <summary>
+        /// Method to create a new book.
+        /// </summary>
+        /// <param name="book">A specific book</param>
+        /// <returns>This book details</returns>
         [HttpPost]
         public async Task<ActionResult<Book>> CreateBook(Book book)
         {
@@ -42,6 +57,12 @@ namespace LibraryManagementApp.Controllers
             return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
         }
 
+        /// <summary>
+        /// Method to update an existing book.
+        /// </summary>
+        /// <param name="id">Book identification</param>
+        /// <param name="book">A book information</param>
+        /// <returns>Ok if updated the book, otherwise bad request</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(Guid id, Book book)
         {
@@ -54,6 +75,11 @@ namespace LibraryManagementApp.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Method to delete a book by its ID.
+        /// </summary>
+        /// <param name="id">Book identification</param>
+        /// <returns>Ok if deleted the book</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(Guid id)
         {

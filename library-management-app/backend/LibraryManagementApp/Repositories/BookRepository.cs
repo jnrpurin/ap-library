@@ -22,7 +22,8 @@ namespace LibraryManagementApp.Repositories
 
         public async Task<Book> GetBookByIdAsync(Guid id)
         {
-            return await _context.Books.FindAsync(id);
+            var book = await _context.Books.FindAsync(id);
+            return book ?? throw new KeyNotFoundException($"Book with ID {id} not found.");
         }
 
         public async Task AddBookAsync(Book book)
