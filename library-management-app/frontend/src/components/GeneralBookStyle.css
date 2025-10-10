@@ -28,6 +28,7 @@
     margin-bottom: 15px;
     color: #1c1c1e;
     text-align: center;
+    font-weight: 600;
   }
   
   .modal label {
@@ -56,6 +57,11 @@
     border-color: #007aff;
     box-shadow: 0 0 5px rgba(0,122,255,0.3);
   }
+
+  .modal input[type="checkbox"] {
+    width: auto;
+    margin-right: 6px;
+  }
   
   .modal-buttons {
     display: flex;
@@ -69,6 +75,9 @@
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
+    border: none;
+    font-family: inherit;
+    transition: background-color 0.2s ease;
   }
   
   .modal-buttons button:first-child {
@@ -87,4 +96,36 @@
   .modal-buttons button:last-child:hover {
     background-color: #d1d1d6;
   }
+
+.modal label {
+  display: block;            
+  font-weight: 600;          
+  color: #007aff;           
+  margin-bottom: 4px;        
+  font-size: 14px;
+  text-transform: uppercase; 
+  letter-spacing: 0.5px;     
+}
+
+.modal .form-group p {
+  margin: 0 0 12px 0;
+  padding: 6px 10px;
+  background-color: #f2f2f7;
+  border-radius: 8px;
+  border: 1px solid #d1d1d6;
+  font-size: 14px;
+  color: #1c1c1e;
+  max-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal .form-group.description p {
+  max-height: none !important;    
+  white-space: normal !important;   
+  overflow: auto !important;      
+}
+
+
   
