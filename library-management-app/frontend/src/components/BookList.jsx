@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import AddBookModal from './AddBookModal';
-import { getBooks, deleteBook, createBook } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import BookModal from './BookModal';
+import BookDetailsModal from './BookDetailsModal';
+import { getBooks, deleteBook, createBook, updateBook } from '../services/api';
 import './BookList.css';
 
 const BookList = () => {
@@ -9,16 +10,10 @@ const BookList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const [showModal, setShowModal] = useState(false);
-  const [newBook, setNewBook] = useState({
-    title: '',
-    author: '',
-    genre: '',
-    publishedDate: '',
-    description: '',
-    isAvailable: true
-  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mode, setMode] = useState('add');
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -32,36 +27,9 @@ const BookList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteBook(id);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleAddBook = async () => {
-    try {
-      const bookToCreate = {
-        ...newBook,
-        id: crypto.randomUUID()
-      };
-      await createBook(bookToCreate);
-      setShowModal(false);
-      setNewBook({
-        title: '',
-        author: '',
-        genre: '',
-        publishedDate: '',
-        description: '',
-        isAvailable: true
-      });
-      fetchData();
-    } catch (err) {
-      console.error('Error saving the new book:', err);
-    }
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const filtered = books.filter(book =>
@@ -71,18 +39,60 @@ const BookList = () => {
     setFilteredBooks(filtered);
   }, [searchTerm, books]);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const handleViewDetails = (book) => {
+    setSelectedBook(book);
+    setIsDetailsOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setIsDetailsOpen(false);
+    setSelectedBook(null);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteBook(id);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddClick = () => {
+    setSelectedBook(null);
+    setMode('add');
+    setIsModalOpen(true);
+  };
+
+  const handleEditClick = (book) => {
+    setSelectedBook(book);
+    setMode('edit');
+    setIsModalOpen(true);
+  };
+
+  const handleSaveBook = async (bookData) => {
+    try {
+      if (mode === 'add') {
+        const newBook = { ...bookData, id: crypto.randomUUID() };
+        await createBook(newBook);
+      } else if (mode === 'edit' && selectedBook) {
+        await updateBook(selectedBook.id, bookData);
+      }
+      setIsModalOpen(false);
+      fetchData();
+    } catch (err) {
+      console.error('Error saving book:', err);
+    }
+  };
 
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">Error: {error}</div>;
 
-  return (     
+  return (
     <div className="book-list-container">
       <div className="book-list-header">
-        <h2 className="book-list-title">Lista de Livros</h2>
-        <button className="add-button" onClick={() => setShowModal(true)}>➕ Adicionar Livro</button>
+        <h2 className="book-list-title">📚 Library Manager</h2>
+        <button className="add-button" onClick={handleAddClick}>➕ Add Book</button>
       </div>
 
       <div className="search-bar">
@@ -95,27 +105,31 @@ const BookList = () => {
       </div>
 
       <ul className="book-list">
-        {books.map(book => (
+        {filteredBooks.map(book => (
           <li key={book.id} className="book-item">
             <div className="book-info">
-              <span className="book-title">{book.title}</span> - <span className="book-author">{book.author}</span>
+              <span className="book-title">{book.title}</span> — <span className="book-author">{book.author}</span>
             </div>
             <div className="book-actions">
-              <button className="edit-button">✏️ Edit</button>
+              <button className="view-button" onClick={() => handleViewDetails(book)}>👁️ View</button>
+              <button className="edit-button" onClick={() => handleEditClick(book)}>✏️ Edit</button>
               <button className="delete-button" onClick={() => handleDelete(book.id)}>🗑️ Delete</button>
             </div>
           </li>
         ))}
       </ul>
 
-      {showModal && (
-        <AddBookModal
-          onClose={() => setShowModal(false)}
-          onSave={async (bookData) => {
-            await createBook({ ...bookData, id: crypto.randomUUID() });
-            setShowModal(false);
-            fetchData();
-          }}
+      {isDetailsOpen && (
+        <BookDetailsModal book={selectedBook} onClose={handleCloseDetails} />
+      )}
+
+      {isModalOpen && (
+        <BookModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveBook}
+          mode={mode}
+          book={selectedBook}
         />
       )}
     </div>
