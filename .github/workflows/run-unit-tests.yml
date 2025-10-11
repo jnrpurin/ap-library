@@ -31,6 +31,7 @@ jobs:
           dotnet test ./library-management-app/backend/UnitTests/UnitTests.csproj
           --configuration Release
           --no-build
+          --collect:"XPlat Code Coverage" \
           /p:CollectCoverage=true
           /p:CoverletOutput=./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/
           /p:CoverletOutputFormat=cobertura
@@ -38,7 +39,7 @@ jobs:
           /p:Threshold=70
 
       - name: List coverage output
-        run: ls -R ./library-management-app/backend/UnitTests/bin/Release/net9.0/
+        run: ls -R ./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/
 
       # Publish test results
       - name: Upload test results
@@ -46,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ./library-management-app/backend/UnitTests/bin/Release/net9.0/
+          path: ./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/
           if-no-files-found: warn
 
       - name: Install ReportGenerator
@@ -57,7 +58,7 @@ jobs:
         run: >
           reportgenerator
           -reports:./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/coverage.cobertura.xml
-          -targetdir:./library-management-app/backend/UnitTests/bin/Release/net9.0/CoverageReport
+          -targetdir:./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/CoverageReport
           -reporttypes:Html
         env:
           PATH: $PATH:/home/runner/.dotnet/tools
@@ -68,5 +69,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
-          path: ./library-management-app/backend/UnitTests/bin/Release/net9.0/CoverageReport
+          path: ./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/CoverageReport
           if-no-files-found: warn
