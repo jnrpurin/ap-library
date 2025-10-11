@@ -25,42 +25,48 @@ jobs:
       - name: Build solution
         run: dotnet build ./library-management-app/backend/LibraryManagementApp.sln --configuration Release --no-restore
 
+      # Create the files into bin/Release/net9.0/
       - name: Run unit tests with coverage
         run: >
           dotnet test ./library-management-app/backend/UnitTests/UnitTests.csproj
           --configuration Release
           --no-build
           /p:CollectCoverage=true
-          /p:CoverletOutput=./library-management-app/backend/UnitTests/TestResults/
-          /p:MergeWith=./library-management-app/backend/UnitTests/TestResults/coverage.json
+          /p:CoverletOutput=./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/
           /p:CoverletOutputFormat=cobertura
           /p:ExcludeByFile="**/Migrations/*"
           /p:Threshold=70
 
+      - name: List coverage output
+        run: ls -R ./library-management-app/backend/UnitTests/bin/Release/net9.0/
+
+      # Publish test results
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ./library-management-app/backend/UnitTests/TestResults/
+          path: ./library-management-app/backend/UnitTests/bin/Release/net9.0/
           if-no-files-found: warn
 
       - name: Install ReportGenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
+      # Create the HTML report using file cobertura.xml
       - name: Create coverage report
         run: >
           reportgenerator
-          -reports:./library-management-app/backend/UnitTests/TestResults/coverage.cobertura.xml
-          -targetdir:./library-management-app/backend/UnitTests/TestResults/CoverageReport
+          -reports:./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/coverage.cobertura.xml
+          -targetdir:./library-management-app/backend/UnitTests/bin/Release/net9.0/CoverageReport
           -reporttypes:Html
         env:
           PATH: $PATH:/home/runner/.dotnet/tools
 
+      # Publish the new report as an artefact
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
-          path: ./library-management-app/backend/UnitTests/TestResults/CoverageReport
+          path: ./library-management-app/backend/UnitTests/bin/Release/net9.0/CoverageReport
           if-no-files-found: warn
