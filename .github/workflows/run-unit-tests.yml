@@ -31,7 +31,6 @@ jobs:
           dotnet test ./library-management-app/backend/UnitTests/UnitTests.csproj
           --configuration Release
           --no-build
-          --collect:"XPlat Code Coverage" \
           /p:CollectCoverage=true
           /p:CoverletOutput=./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/
           /p:CoverletOutputFormat=cobertura
