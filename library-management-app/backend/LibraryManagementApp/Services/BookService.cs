@@ -1,16 +1,11 @@
+using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
-using LibraryManagementApp.Repositories;
 
 namespace LibraryManagementApp.Services
 {
-    public class BookService : IBookService
+    public class BookService(IBookRepository bookRepository) : IBookService
     {
-        private readonly IBookRepository _bookRepository;
-
-        public BookService(IBookRepository bookRepository)
-        {
-            _bookRepository = bookRepository;
-        }
+        private readonly IBookRepository _bookRepository= bookRepository;
 
         public async Task<IEnumerable<Book>> GetAllBooksAsync()
         {

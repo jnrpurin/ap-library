@@ -16,7 +16,7 @@ namespace LibraryManagementApp.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
             modelBuilder.Entity<BookLoan>()
                 .HasOne(bl => bl.Book)
                 .WithMany()
@@ -26,6 +26,11 @@ namespace LibraryManagementApp.Data
                 .HasOne(bl => bl.User)
                 .WithMany()
                 .HasForeignKey(bl => bl.UserId);
+                
+            modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<string>()
+                .HasMaxLength(80);
         }
     }
 }

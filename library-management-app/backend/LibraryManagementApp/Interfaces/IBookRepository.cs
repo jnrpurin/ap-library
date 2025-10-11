@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using LibraryManagementApp.Models;
 
-namespace LibraryManagementApp.Repositories
+namespace LibraryManagementApp.Interfaces
 {
     public interface IBookRepository
     {

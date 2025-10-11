@@ -1,8 +1,7 @@
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using LibraryManagementApp.Models;
 using LibraryManagementApp.Data;
+using LibraryManagementApp.Interfaces;
+using LibraryManagementApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementApp.Repositories
 {

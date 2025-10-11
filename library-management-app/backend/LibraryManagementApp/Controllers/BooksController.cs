@@ -1,28 +1,28 @@
-using Microsoft.AspNetCore.Mvc;
+using LibraryManagementApp.Enums;
+using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
-using LibraryManagementApp.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagementApp.Controllers
 {
     /// <summary>
     /// API controller for managing books in the library.
     /// </summary>
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
-    public class BooksController : ControllerBase
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    public class BooksController(IBookService bookService) : ControllerBase
     {
-        private readonly IBookService _bookService;
-
-        public BooksController(IBookService bookService)
-        {
-            _bookService = bookService;
-        }
+        private readonly IBookService _bookService = bookService;
 
         /// <summary>
         /// Method to get all books.
         /// </summary>
         /// <returns>A list of all books saved</returns>
         [HttpGet]
+        [MapToApiVersion("1.0")]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
             var books = await _bookService.GetAllBooksAsync();
@@ -35,6 +35,7 @@ namespace LibraryManagementApp.Controllers
         /// <param name="id">Book identification</param>
         /// <returns>A book information</returns>
         [HttpGet("{id}")]
+        [MapToApiVersion("1.0")]
         public async Task<ActionResult<Book>> GetBookById(Guid id)
         {
             var book = await _bookService.GetBookByIdAsync(id);
@@ -51,6 +52,8 @@ namespace LibraryManagementApp.Controllers
         /// <param name="book">A specific book</param>
         /// <returns>This book details</returns>
         [HttpPost]
+        [MapToApiVersion("1.0")]
+        [Authorize(Roles = "Standard,Admin")]
         public async Task<ActionResult<Book>> CreateBook(Book book)
         {
             await _bookService.AddBookAsync(book);
@@ -64,6 +67,8 @@ namespace LibraryManagementApp.Controllers
         /// <param name="book">A book information</param>
         /// <returns>Ok if updated the book, otherwise bad request</returns>
         [HttpPut("{id}")]
+        [MapToApiVersion("1.0")]
+        [Authorize(Roles = "Standard,Admin")]
         public async Task<IActionResult> UpdateBook(Guid id, Book book)
         {
             if (id != book.Id)
@@ -81,6 +86,8 @@ namespace LibraryManagementApp.Controllers
         /// <param name="id">Book identification</param>
         /// <returns>Ok if deleted the book</returns>
         [HttpDelete("{id}")]
+        [MapToApiVersion("1.0")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBook(Guid id)
         {
             await _bookService.DeleteBookAsync(id);

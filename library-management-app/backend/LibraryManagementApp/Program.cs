@@ -1,81 +1,70 @@
 using LibraryManagementApp.Data;
+using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Repositories;
 using LibraryManagementApp.Services;
+using LibraryManagementApp.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using LibraryManagementApp.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using LibraryManagementApp.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontendApp",
+        policy => policy.WithOrigins("http://localhost:3000")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+});
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddSwaggerDocumentation();
+
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBookService, BookService>();
 
 var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connStr, ServerVersion.AutoDetect(connStr)));
 
-builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<IBookService, BookService>();
-
-// Controllers + MVC
-builder.Services.AddControllersWithViews();
-
-// CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins",
-        policy => policy.WithOrigins("http://localhost:3000")
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
-});
-
-// Swagger / OpenAPI
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Library Management API",
-        Version = "v1",
-        Description = "This API allows you to manage the library books",
-        Contact = new OpenApiContact
-        {
-            Name = "Ademir Purin",
-            Email = "jnrpurin@gmail.com",
-            Url = new Uri("https://github.com/jnrpurin")
-        }
-    });
-
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-        c.IncludeXmlComments(xmlPath);
-});
+builder.Services.AddControllers();
+builder.Services.AddApiVersion();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+    var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    app.UseSwaggerUI(options =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
-        c.RoutePrefix = string.Empty;
+        foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+        }
     });
-}
-else
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+    await DataSeeder.SeedUsersAsync(dbContext);
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-
 app.UseRouting();
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowFrontendApp");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
-// MVC route
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
 
 app.Run();

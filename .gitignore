@@ -31,6 +31,7 @@ bld/
 appsettings.Development.json
 appsettings.Local.json
 appsettings.*.local.json
+library-management-app/backend/LibraryManagementApp/appsettings.Development.json
 
 # .NET Core
 project.lock.json
@@ -85,3 +86,4 @@ nunit-*.xml
 
 # Cache
 /frontend/.cache/
+/library-management-app/backend/LibraryManagementApp/appsettings.Development.json
