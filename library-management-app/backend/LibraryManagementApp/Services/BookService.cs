@@ -1,5 +1,5 @@
+using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
-using LibraryManagementApp.Repositories;
 
 namespace LibraryManagementApp.Services
 {

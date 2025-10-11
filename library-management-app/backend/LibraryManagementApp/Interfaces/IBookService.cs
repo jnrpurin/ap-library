@@ -1,6 +1,6 @@
 using LibraryManagementApp.Models;
 
-namespace LibraryManagementApp.Services
+namespace LibraryManagementApp.Interfaces
 {
     public interface IBookService
     {

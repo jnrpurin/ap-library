@@ -1,14 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
+using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
-using LibraryManagementApp.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagementApp.Controllers
 {
     /// <summary>
     /// API controller for managing books in the library.
     /// </summary>
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
         private readonly IBookService _bookService;
