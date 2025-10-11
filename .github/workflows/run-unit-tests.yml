@@ -1,7 +1,9 @@
-name: Run Unit Tests
+name: Run Unit Tests with Coverage
 
 on:
   pull_request:
+    branches: [ main ]
+  push:
     branches: [ main ]
 
 jobs:
@@ -18,10 +20,42 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore **/*.sln
+        run: dotnet restore ./library-management-app/backend/LibraryManagementApp.sln
 
       - name: Build solution
-        run: dotnet build **/*.sln --configuration Release --no-restore
+        run: dotnet build ./library-management-app/backend/LibraryManagementApp.sln --configuration Release --no-restore
 
       - name: Run unit tests with coverage
-        run: dotnet test **/*.sln --collect:"XPlat Code Coverage"
+        run: >
+          dotnet test ./library-management-app/backend/UnitTests/UnitTests.csproj
+          --configuration Release
+          --no-build
+          /p:CollectCoverage=true
+          /p:CoverletOutput=TestResults/coverage/
+          /p:CoverletOutputFormat=cobertura
+          /p:ExcludeByFile="**/Migrations/*"
+          /p:Threshold=70
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ./library-management-app/backend/UnitTests/TestResults/
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Create coverage report
+        run: >
+          reportgenerator
+          -reports:./library-management-app/backend/UnitTests/TestResults/coverage.cobertura.xml
+          -targetdir:./library-management-app/backend/UnitTests/TestResults/CoverageReport
+          -reporttypes:Html
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ./library-management-app/backend/UnitTests/TestResults/CoverageReport
