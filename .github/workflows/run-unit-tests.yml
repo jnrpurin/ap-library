@@ -31,7 +31,8 @@ jobs:
           --configuration Release
           --no-build
           /p:CollectCoverage=true
-          /p:CoverletOutput=TestResults/coverage/
+          /p:CoverletOutput=./library-management-app/backend/UnitTests/TestResults/
+          /p:MergeWith=./library-management-app/backend/UnitTests/TestResults/coverage.json
           /p:CoverletOutputFormat=cobertura
           /p:ExcludeByFile="**/Migrations/*"
           /p:Threshold=70
@@ -42,6 +43,7 @@ jobs:
         with:
           name: test-results
           path: ./library-management-app/backend/UnitTests/TestResults/
+          if-no-files-found: warn
 
       - name: Install ReportGenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
@@ -52,6 +54,8 @@ jobs:
           -reports:./library-management-app/backend/UnitTests/TestResults/coverage.cobertura.xml
           -targetdir:./library-management-app/backend/UnitTests/TestResults/CoverageReport
           -reporttypes:Html
+        env:
+          PATH: $PATH:/home/runner/.dotnet/tools
 
       - name: Upload coverage report
         if: always()
@@ -59,3 +63,4 @@ jobs:
         with:
           name: code-coverage-report
           path: ./library-management-app/backend/UnitTests/TestResults/CoverageReport
+          if-no-files-found: warn
