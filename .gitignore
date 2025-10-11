@@ -86,3 +86,4 @@ nunit-*.xml
 
 # Cache
 /frontend/.cache/
+/library-management-app/backend/LibraryManagementApp/appsettings.Development.json

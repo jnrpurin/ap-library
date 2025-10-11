@@ -33,18 +33,10 @@ namespace LibraryManagementApp.Extensions
                     }
                 });
 
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Library Management API",
-                    Version = "v1",
-                    Description = "API for managing books and users.",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Ademir Purin",
-                        Email = "jnrpurin@gmail.com",
-                        Url = new Uri("https://github.com/jnrpurin")
-                    }
-                });
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (File.Exists(xmlPath))
+                    c.IncludeXmlComments(xmlPath);
             });
 
             return services;

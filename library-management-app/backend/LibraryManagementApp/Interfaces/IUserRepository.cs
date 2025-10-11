@@ -4,7 +4,12 @@ namespace LibraryManagementApp.Interfaces
 {
     public interface IUserRepository
     {
-        Task<User> GetByUsernameAsync(string username);
+        Task<IEnumerable<User>> GetAllAsync();
+        Task<User?> GetByIdAsync(Guid id);
+        Task<User?> GetByUsernameAsync(string username);
+
         Task CreateAsync(User user);
+        void Update(User user);
+        Task SaveChangesAsync();
     }
 }
