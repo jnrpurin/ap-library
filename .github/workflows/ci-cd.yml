@@ -1,0 +1,112 @@
+name: CI/CD - Tests, Build & Publish Docker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  SOLUTION_PATH: ./backend/LibraryManagementApp.sln
+  BACKEND_CONTEXT: ./backend
+  FRONTEND_CONTEXT: ./frontend
+  BACKEND_DOCKERFILE: ./backend/Dockerfile
+  FRONTEND_DOCKERFILE: ./frontend/Dockerfile
+  # todo: change image names 
+  IMAGE_BACKEND: ${{ secrets.DOCKERHUB_USERNAME }}/library-backend
+  IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/library-frontend
+  DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '20.x'
+
+jobs:
+  test:
+    name: Restore, Build & Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build solution
+        run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --logger "trx;LogFileName=test_results.trx"
+
+      - name: Upload test results (for GitHub)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResults/*.trx'
+
+  build-and-push:
+    name: Build Docker images & Publish
+    runs-on: ubuntu-latest
+    needs: test
+    concurrency:
+      group: ci-cd-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build & push backend image
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ env.BACKEND_CONTEXT }}
+          file: ${{ env.BACKEND_DOCKERFILE }}
+          push: ${{ github.ref == 'refs/heads/main' }}        # push only on real main pushes
+          tags: >
+            ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+            ${{ env.IMAGE_BACKEND }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build & push frontend image
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ env.FRONTEND_CONTEXT }}
+          file: ${{ env.FRONTEND_DOCKERFILE }}
+          push: ${{ github.ref == 'refs/heads/main' }}        # push only on real main pushes
+          tags: >
+            ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
+            ${{ env.IMAGE_FRONTEND }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Show pushed images (info)
+        run: |
+          echo "Backend image: $IMAGE_BACKEND:${GITHUB_SHA}"
+          echo "Frontend image: $IMAGE_FRONTEND:${GITHUB_SHA}"
+        env:
+          IMAGE_BACKEND: ${{ env.IMAGE_BACKEND }}
+          IMAGE_FRONTEND: ${{ env.IMAGE_FRONTEND }}
+          GITHUB_SHA: ${{ github.sha }}
