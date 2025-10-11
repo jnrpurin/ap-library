@@ -18,10 +18,10 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore ./backend/LibraryManagementApp.sln
+        run: dotnet restore **/*.sln
 
       - name: Build solution
-        run: dotnet build ./backend/LibraryManagementApp.sln --configuration Release --no-restore
+        run: dotnet build **/*.sln --configuration Release --no-restore
 
       - name: Run unit tests with coverage
-        run: dotnet test ./backend/LibraryManagementApp.sln --collect:"XPlat Code Coverage"
+        run: dotnet test **/*.sln --collect:"XPlat Code Coverage"
