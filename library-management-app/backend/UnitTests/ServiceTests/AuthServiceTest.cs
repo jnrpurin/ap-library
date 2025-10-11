@@ -4,9 +4,10 @@ using LibraryManagementApp.Helper;
 using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
 using LibraryManagementApp.Services;
+using LibraryManagementApp.Enums;
 using Moq;
 
-namespace LibraryManagementApp.Tests.Services
+namespace UnitTests.ServiceTests
 {
     public class AuthServiceTests
     {
@@ -43,7 +44,7 @@ namespace LibraryManagementApp.Tests.Services
                 Username = "adm",
                 PasswordHash = PasswordHelper.HashPassword("123"),
                 Email = "email@email.com",
-                Role = Enums.UserRole.Admin
+                Role = UserRole.Admin
             };
 
             _userRepositoryMock.Setup(r => r.GetByUsernameAsync("adm"))
@@ -66,7 +67,7 @@ namespace LibraryManagementApp.Tests.Services
                 Username = "adm",
                 PasswordHash = PasswordHelper.HashPassword("123"),
                 Email = "email@email.com",
-                Role = Enums.UserRole.Admin
+                Role = UserRole.Admin
             };
 
             _userRepositoryMock.Setup(r => r.GetByUsernameAsync("adm"))
@@ -89,7 +90,7 @@ namespace LibraryManagementApp.Tests.Services
                 Id = Guid.NewGuid(),
                 Username = "adm",
                 Email = "email@email.com",
-                Role = Enums.UserRole.Admin,
+                Role = UserRole.Admin,
                 PasswordHash = string.Empty 
             };
 
@@ -123,7 +124,7 @@ namespace LibraryManagementApp.Tests.Services
         public void GenerateJwtToken_ShouldThrow_WhenSecretKeyInvalid()
         {
             // Arrange
-            var user = new User { Id = Guid.NewGuid(), Username = "test", Email = "email@email.com", Role = Enums.UserRole.Admin, PasswordHash = string.Empty };
+            var user = new User { Id = Guid.NewGuid(), Username = "test", Email = "email@email.com", Role = UserRole.Admin, PasswordHash = string.Empty };
             var invalidKey = "";
 
             // Act & Assert

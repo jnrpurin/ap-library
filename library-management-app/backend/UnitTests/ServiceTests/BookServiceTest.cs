@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
 using LibraryManagementApp.Services;
 using Moq;
-using Xunit;
 
-namespace LibraryManagementApp.Tests.Services
+namespace UnitTests.ServiceTests
 {
     public class BookServiceTests
     {
