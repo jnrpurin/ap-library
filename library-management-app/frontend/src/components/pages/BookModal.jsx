@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './GeneralBookStyle.css';
+import '../style/GeneralBookStyle.css';
 
 const BookModal = ({ isOpen, onClose, onSave, onUpdate, mode = "add", book }) => {
   const [formData, setFormData] = useState({

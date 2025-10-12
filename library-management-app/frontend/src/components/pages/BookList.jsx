@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import BookModal from './BookModal';
 import BookDetailsModal from './BookDetailsModal';
-import { getBooks, deleteBook, createBook, updateBook } from '../services/api';
-import './BookList.css';
+import { getBooks, deleteBook, createBook, updateBook } from '../../services/api';
+import '../style/BookListStyle.css';
 
-const BookList = () => {
+const BookList = ({ roles = [] }) => {
   const [books, setBooks] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,6 +14,9 @@ const BookList = () => {
   const [mode, setMode] = useState('add');
   const [selectedBook, setSelectedBook] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  
+  const isAdmin = roles.includes('User_Admin');
+  const canLoanOrReturn = isAdmin || roles.includes('Member_Client');
 
   const fetchData = async () => {
     try {
@@ -50,6 +53,7 @@ const BookList = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!isAdmin) return;
     try {
       await deleteBook(id);
       fetchData();
@@ -59,6 +63,7 @@ const BookList = () => {
   };
 
   const handleAddClick = () => {
+    if (!isAdmin) return;
     setSelectedBook(null);
     setMode('add');
     setIsModalOpen(true);
@@ -70,7 +75,20 @@ const BookList = () => {
     setIsModalOpen(true);
   };
 
+  const handleLoanClick = (book) => {
+    setSelectedBook(book);
+    setMode('loan');
+    //setIsModalOpen(true);
+  };
+
+  const handleReturnClick = (book) => {
+    setSelectedBook(book);
+    setMode('return');
+    //setIsModalOpen(true);
+  };
+
   const handleSaveBook = async (bookData) => {
+    if (!isAdmin) return;
     try {
       if (mode === 'add') {
         const newBook = { ...bookData, id: crypto.randomUUID() };
@@ -92,7 +110,9 @@ const BookList = () => {
     <div className="book-list-container">
       <div className="book-list-header">
         <h2 className="book-list-title">📚 Library Manager</h2>
-        <button className="add-button" onClick={handleAddClick}>➕ Add Book</button>
+        {isAdmin && (
+          <button className="add-button" onClick={handleAddClick}>➕ Add Book</button>
+        )}
       </div>
 
       <div className="search-bar">
@@ -111,9 +131,22 @@ const BookList = () => {
               <span className="book-title">{book.title}</span> — <span className="book-author">{book.author}</span>
             </div>
             <div className="book-actions">
-              <button className="view-button" onClick={() => handleViewDetails(book)}>👁️ View</button>
-              <button className="edit-button" onClick={() => handleEditClick(book)}>✏️ Edit</button>
-              <button className="delete-button" onClick={() => handleDelete(book.id)}>🗑️ Delete</button>
+            <button className="view-button" onClick={() => handleViewDetails(book)}>👁️ View</button>
+              {isAdmin && (
+                  <>
+                      <button className="edit-button" onClick={() => handleEditClick(book)}>✏️ Edit</button>
+                      <button className="delete-button" onClick={() => handleDelete(book.id)}>🗑️ Delete</button>
+                  </>
+              )}
+              {canLoanOrReturn && (
+                <>
+                  {book.isAvailable ? (
+                    <button className="add-button" onClick={() => handleLoanClick(book)}>Loan book</button>
+                  ) : (
+                    <button className="edit-button" onClick={() => handleReturnClick(book)}>Return book</button>
+                  )}
+                </>
+              )}
             </div>
           </li>
         ))}
