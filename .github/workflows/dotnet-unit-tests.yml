@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+env:
+  SOLUTION_PATH: ./library-management-app/backend/LibraryManagementApp.sln
+  UNIT_TEST_PROJECT_PATH: ./library-management-app/backend/UnitTests/UnitTests.csproj
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -21,13 +25,13 @@ jobs:
         dotnet-version: '9.x'
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
 
-    - name: Build
-      run: dotnet build --no-restore
+    - name: Build solution
+      run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore
 
     - name: Run unit tests
-      run: dotnet test --no-build --verbosity normal --logger trx --results-directory "./test-results"
+      run: dotnet test ${{ env.UNIT_TEST_PROJECT_PATH }} --no-build --verbosity normal --logger trx --results-directory "./test-results"
 
     - name: Publish test results
       uses: dorny/test-reporter@v1
