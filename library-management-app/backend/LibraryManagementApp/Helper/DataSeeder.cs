@@ -43,7 +43,18 @@ namespace LibraryManagementApp.Helper
                 IsActive = true
             };
 
-            await context.Users.AddRangeAsync(admin, normalUser, readOnlyUser);
+            var customerMemeber = new User
+            {
+                Username = "member",
+                PasswordHash = PasswordHelper.HashPassword("member!"),
+                Email = "viewer@aplibrary.com",
+                Role = UserRole.Member_Client,
+                IsActive = true
+            };
+
+            
+
+            await context.Users.AddRangeAsync(admin, normalUser, readOnlyUser, customerMemeber);
             await context.SaveChangesAsync();
         }
     }

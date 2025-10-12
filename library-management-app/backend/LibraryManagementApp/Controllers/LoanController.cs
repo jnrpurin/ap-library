@@ -48,7 +48,11 @@ namespace LibraryManagementApp.Controllers
             return Ok(loan);
         }
 
-        [HttpGet()]
+        /// <summary>
+        /// Method to get loans by the currently authenticated customer.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("by-customer")]
         [MapToApiVersion("1.0")]
         [Authorize(Roles = "User_Admin,User_Standard,User_ReadOnly,Member_Client")]
         public async Task<ActionResult<BookLoan>> GetLoansByCustomer()

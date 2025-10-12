@@ -22,7 +22,9 @@ namespace LibraryManagementApp.Helper
                 {
                     Title = "Library Management API",
                     Version = description.ApiVersion.ToString(),
-                    Description = "API with versioning support (v1, v2, ...)",
+                    Description = @$"This project is a comprehensive library management application developed using .NET 9 and C#.
+                                     It features a robust architecture following MVC 4.0 standards and SOLID principles, designed to efficiently manage book loans, including user authentication with a login screen and advanced book search capabilities. 
+                                     The entire solution is containerized using Docker and orchestrated with Kubernetes, ensuring scalability, portability, and ease of deployment across various environments.",
                     Contact = new OpenApiContact
                     {
                         Name = "Ademir Purin",
