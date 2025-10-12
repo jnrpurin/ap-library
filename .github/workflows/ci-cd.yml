@@ -97,7 +97,6 @@ jobs:
           path: ${{ env.REPORT_DIR }}
           if-no-files-found: warn
 
----
   build-and-push:
     name: Build Docker images & Publish
     runs-on: ubuntu-latest
