@@ -50,7 +50,7 @@ jobs:
           --no-build
           --logger "trx;LogFileName=test_results.trx"
           /p:CollectCoverage=true
-          /p:CoverletOutput=${{ env.TEST_OUTPUT_DIR }}coverage.
+          /p:CoverletOutput=${{ env.TEST_OUTPUT_DIR }}coverage/  # << AJUSTE CRÍTICO: 'coverage/' em vez de 'coverage.'
           /p:CoverletOutputFormat=cobertura
           /p:ExcludeByFile="**/Migrations/*"
           /p:Threshold=70
@@ -59,15 +59,15 @@ jobs:
       - name: Set coverage path variables
         id: coverage_path
         run: |
-          # 💡 Definindo o caminho EXATO do arquivo e do diretório para as próximas etapas
-          echo "COBERTURA_FILE=${{ env.TEST_OUTPUT_DIR }}coverage.cobertura.xml" >> $GITHUB_ENV
-          echo "REPORT_DIR=${{ env.TEST_OUTPUT_DIR }}CoverageReport" >> $GITHUB_ENV
+          # 💡 ATUALIZADO: O arquivo e o relatório de cobertura estão na sub-pasta 'coverage/'
+          echo "COBERTURA_FILE=${{ env.TEST_OUTPUT_DIR }}coverage/coverage.cobertura.xml" >> $GITHUB_ENV
+          echo "REPORT_DIR=${{ env.TEST_OUTPUT_DIR }}coverage/CoverageReport" >> $GITHUB_ENV # << AJUSTADO
         
       - name: List coverage output (Debug)
-        # O ls agora lista a pasta onde o arquivo deve estar, antes e depois de ser gerado pelo Coverlet.
+        # Agora listamos a nova sub-pasta 'coverage/' para verificar se o arquivo existe.
         run: |
-          echo "Listing files in: ${{ env.TEST_OUTPUT_DIR }}"
-          ls -R ${{ env.TEST_OUTPUT_DIR }} || echo "Directory listing failed or directory not created (expected if empty)"
+          echo "Listing files in: ${{ env.TEST_OUTPUT_DIR }}coverage/"
+          ls -R ${{ env.TEST_OUTPUT_DIR }}coverage/ || echo "Directory listing failed or directory not created (expected if empty)" # << AJUSTADO
 
       - name: Install ReportGenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
