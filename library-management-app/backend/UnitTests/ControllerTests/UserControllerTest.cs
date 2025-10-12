@@ -50,7 +50,7 @@ namespace UnitTests.ControllerTests
         public async Task GetById_ShouldReturnNotFound_WhenUserNotExists()
         {
             var id = Guid.NewGuid();
-            _userServiceMock.Setup(s => s.GetUserByIdAsync(id)).ReturnsAsync((User)null);
+            _userServiceMock.Setup(s => s.GetUserByIdAsync(id)).ReturnsAsync((User?)null);
 
             var result = await _controller.GetById(id);
 
@@ -90,7 +90,7 @@ namespace UnitTests.ControllerTests
         {
             var id = Guid.NewGuid();
             var dto = new UpdateUserDTO();
-            _userServiceMock.Setup(s => s.UpdateUserAsync(id, dto)).ReturnsAsync((User)null);
+            _userServiceMock.Setup(s => s.UpdateUserAsync(id, dto)).ReturnsAsync((User?)null);
 
             var result = await _controller.Update(id, dto);
 

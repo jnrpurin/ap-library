@@ -51,7 +51,7 @@ namespace UnitTests.ControllerTests
         public async Task GetBookById_ShouldReturnNotFound_WhenBookDoesNotExist()
         {
             var id = Guid.NewGuid();
-            _bookServiceMock.Setup(s => s.GetBookByIdAsync(id)).ReturnsAsync((Book)null);
+            _bookServiceMock.Setup(s => s.GetBookByIdAsync(id)).ReturnsAsync((Book?)null);
 
             var result = await _controller.GetBookById(id);
 

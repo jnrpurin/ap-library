@@ -26,7 +26,7 @@ namespace UnitTests.ServiceTests
                 new() { Id = Guid.NewGuid(), Title = "Book 2" }
             };
 
-            _bookRepositoryMock.Setup(r => r.GetAllBooksAsync())
+            _bookRepositoryMock.Setup(r => r.GetAllAsync())
                 .ReturnsAsync(books);
 
             // Act
@@ -35,7 +35,7 @@ namespace UnitTests.ServiceTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(2, ((List<Book>)result).Count);
-            _bookRepositoryMock.Verify(r => r.GetAllBooksAsync(), Times.Once);
+            _bookRepositoryMock.Verify(r => r.GetAllAsync(), Times.Once);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace UnitTests.ServiceTests
             var bookId = Guid.NewGuid();
             var expectedBook = new Book { Id = bookId, Title = "Test Book" };
 
-            _bookRepositoryMock.Setup(r => r.GetBookByIdAsync(bookId))
+            _bookRepositoryMock.Setup(r => r.GetByIdAsync(bookId))
                 .ReturnsAsync(expectedBook);
 
             // Act
@@ -54,7 +54,7 @@ namespace UnitTests.ServiceTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("Test Book", result.Title);
-            _bookRepositoryMock.Verify(r => r.GetBookByIdAsync(bookId), Times.Once);
+            _bookRepositoryMock.Verify(r => r.GetByIdAsync(bookId), Times.Once);
         }
 
         [Fact]
@@ -63,15 +63,15 @@ namespace UnitTests.ServiceTests
             // Arrange
             var bookId = Guid.NewGuid();
 
-            _bookRepositoryMock.Setup(r => r.GetBookByIdAsync(bookId))
-                .ReturnsAsync((Book)null);
+            _bookRepositoryMock.Setup(r => r.GetByIdAsync(bookId))
+                .ReturnsAsync((Book?)null);
 
             // Act
             var result = await _bookService.GetBookByIdAsync(bookId);
 
             // Assert
             Assert.Null(result);
-            _bookRepositoryMock.Verify(r => r.GetBookByIdAsync(bookId), Times.Once);
+            _bookRepositoryMock.Verify(r => r.GetByIdAsync(bookId), Times.Once);
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace UnitTests.ServiceTests
             await _bookService.AddBookAsync(newBook);
 
             // Assert
-            _bookRepositoryMock.Verify(r => r.AddBookAsync(newBook), Times.Once);
+            _bookRepositoryMock.Verify(r => r.AddAsync(newBook), Times.Once);
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace UnitTests.ServiceTests
             await _bookService.UpdateBookAsync(existingBook);
 
             // Assert
-            _bookRepositoryMock.Verify(r => r.UpdateBookAsync(existingBook), Times.Once);
+            _bookRepositoryMock.Verify(r => r.Update(existingBook), Times.Once);
         }
 
         [Fact]
@@ -105,12 +105,15 @@ namespace UnitTests.ServiceTests
         {
             // Arrange
             var bookId = Guid.NewGuid();
+            var existingBook = new Book { Id = bookId, Title = "Book to Delete" };
+            _bookRepositoryMock.Setup(r => r.GetByIdAsync(bookId))
+                .ReturnsAsync(existingBook);
 
             // Act
             await _bookService.DeleteBookAsync(bookId);
 
             // Assert
-            _bookRepositoryMock.Verify(r => r.DeleteBookAsync(bookId), Times.Once);
+            _bookRepositoryMock.Verify(r => r.Remove(existingBook), Times.Once);
         }
     }
 }

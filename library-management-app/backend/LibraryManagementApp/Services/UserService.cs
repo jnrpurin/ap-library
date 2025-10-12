@@ -37,7 +37,7 @@ namespace LibraryManagementApp.Services
 
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
-            await _userRepository.CreateAsync(user);
+            await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
 
             return user;

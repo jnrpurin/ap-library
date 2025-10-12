@@ -25,7 +25,7 @@ namespace UnitTests.ServiceTests
         {
             // Arrange
             _userRepositoryMock.Setup(r => r.GetByUsernameAsync("unknown"))
-                .ReturnsAsync((User)null);
+                .ReturnsAsync((User?)null);
 
             // Act
             var result = await _authService.VerifyLoginAsync("unknown", "123");
