@@ -12,16 +12,14 @@ permissions:
   id-token: write
 
 env:
+  # ... (suas outras variáveis de ambiente)
   SOLUTION_PATH: ./library-management-app/backend/LibraryManagementApp.sln
   UNIT_TEST_PROJECT_PATH: ./library-management-app/backend/UnitTests/UnitTests.csproj
   BACKEND_CONTEXT: ./library-management-app/backend
-  FRONTEND_CONTEXT: ./library-management-app/frontend
-  BACKEND_DOCKERFILE: ./library-management-app/backend/Dockerfile
-  FRONTEND_DOCKERFILE: ./library-management-app/frontend/Dockerfile
-  # Trocar o nome do usuário/imagem
-  IMAGE_BACKEND: ${{ secrets.DOCKERHUB_USERNAME }}/library-backend
-  IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/library-frontend
+  # ... (outras variáveis)
   DOTNET_VERSION: '9.0.x'
+  # Nova variável para o diretório base de resultados (onde o Coverlet salva por padrão no CI)
+  TEST_OUTPUT_DIR: ${{ github.workspace }}/library-management-app/backend/UnitTests/bin/Release/net9.0/
 
 jobs:
   test-and-coverage:
@@ -42,40 +40,40 @@ jobs:
       - name: Build solution
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
       
-      # O Coverlet gera os arquivos no diretório bin/Release/net9.0/ do projeto de teste.
-      # "/p:CoverletOutput" força o nome do arquivo, com caminho padrão.
+      # 🛠️ AJUSTE CRÍTICO: Definimos o caminho de saída explicitamente como um arquivo.
+      # O caminho completo do arquivo de cobertura será: 
+      # ./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage.cobertura.xml
       - name: Run unit tests with coverage
         run: >
-          dotnet test ${{ env.TEST_PROJECT_PATH }}
+          dotnet test ${{ env.UNIT_TEST_PROJECT_PATH }}
           --configuration Release
           --no-build
           --logger "trx;LogFileName=test_results.trx"
           /p:CollectCoverage=true
-          /p:CoverletOutput=coverage/
+          /p:CoverletOutput=${{ env.TEST_OUTPUT_DIR }}coverage.
           /p:CoverletOutputFormat=cobertura
           /p:ExcludeByFile="**/Migrations/*"
           /p:Threshold=70
-        env:
-          TEST_PROJECT_PATH: ${{ env.UNIT_TEST_PROJECT_PATH }}
+          /p:ThresholdType=line # Adicionando tipo para robustez
 
-      # O Coverlet salva a saída na pasta bin/ do projeto de teste.
-      # Caminho completo: ./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/
-      - name: Set coverage path variable
+      - name: Set coverage path variables
         id: coverage_path
         run: |
-          echo "COVERAGE_DIR=${{ env.BACKEND_CONTEXT }}/UnitTests/bin/Release/net9.0/" >> $GITHUB_ENV
-          echo "REPORT_DIR=${{ env.BACKEND_CONTEXT }}/UnitTests/bin/Release/net9.0/CoverageReport" >> $GITHUB_ENV
-          echo "COBERTURA_FILE=${{ env.BACKEND_CONTEXT }}/UnitTests/bin/Release/net9.0/coverage.cobertura.xml" >> $GITHUB_ENV
+          # 💡 Definindo o caminho EXATO do arquivo e do diretório para as próximas etapas
+          echo "COBERTURA_FILE=${{ env.TEST_OUTPUT_DIR }}coverage.cobertura.xml" >> $GITHUB_ENV
+          echo "REPORT_DIR=${{ env.TEST_OUTPUT_DIR }}CoverageReport" >> $GITHUB_ENV
         
       - name: List coverage output (Debug)
+        # O ls agora lista a pasta onde o arquivo deve estar, antes e depois de ser gerado pelo Coverlet.
         run: |
-          echo "Listing files in: ${{ env.COVERAGE_DIR }}"
-          ls -R ${{ env.COVERAGE_DIR }}
+          echo "Listing files in: ${{ env.TEST_OUTPUT_DIR }}"
+          ls -R ${{ env.TEST_OUTPUT_DIR }} || echo "Directory listing failed or directory not created (expected if empty)"
 
       - name: Install ReportGenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
       - name: Create coverage report (HTML)
+        # A nova variável COBERTURA_FILE aponta para o caminho exato e completo.
         run: >
           reportgenerator
           -reports:${{ env.COBERTURA_FILE }}
@@ -84,7 +82,7 @@ jobs:
         env:
           PATH: $PATH:/home/runner/.dotnet/tools
           
-      # Publicar Resultados dos Testes
+      # 1. Publicar Resultados dos Testes no GitHub (TRX)
       - name: Upload test results (TRX)
         if: always()
         uses: actions/upload-artifact@v4
@@ -93,7 +91,7 @@ jobs:
           path: '**/TestResults/*.trx'
           if-no-files-found: warn
 
-      # Publicar Relatório de Cobertura (HTML)
+      # 2. Publicar Relatório de Cobertura (HTML)
       - name: Upload coverage report (HTML)
         if: always()
         uses: actions/upload-artifact@v4
