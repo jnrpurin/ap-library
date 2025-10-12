@@ -52,7 +52,7 @@ namespace LibraryManagementApp.Controllers
         /// <returns>This book details</returns>
         [HttpPost]
         [MapToApiVersion("1.0")]
-        [Authorize(Roles = "Standard,Admin")]
+        [Authorize(Roles = "User_Admin,User_Standard")]
         public async Task<ActionResult<Book>> CreateBook(Book book)
         {
             await _bookService.AddBookAsync(book);
@@ -67,7 +67,7 @@ namespace LibraryManagementApp.Controllers
         /// <returns>Ok if updated the book, otherwise bad request</returns>
         [HttpPut("{id}")]
         [MapToApiVersion("1.0")]
-        [Authorize(Roles = "Standard,Admin")]
+        [Authorize(Roles = "User_Admin,User_Standard")]
         public async Task<IActionResult> UpdateBook(Guid id, Book book)
         {
             if (id != book.Id)
@@ -86,7 +86,7 @@ namespace LibraryManagementApp.Controllers
         /// <returns>Ok if deleted the book</returns>
         [HttpDelete("{id}")]
         [MapToApiVersion("1.0")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "User_Admin")]
         public async Task<IActionResult> DeleteBook(Guid id)
         {
             await _bookService.DeleteBookAsync(id);

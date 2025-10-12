@@ -1,4 +1,3 @@
-using LibraryManagementApp.DTO;
 using LibraryManagementApp.Helper;
 using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
@@ -9,9 +8,10 @@ using System.Text;
 
 namespace LibraryManagementApp.Services
 {
-    public class AuthService(IUserRepository userRepository) : IAuthService
+    public class AuthService(IUserRepository userRepository, IHttpContextAccessor httpContextAccessor) : IAuthService
     {
         private readonly IUserRepository _userRepository = userRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<bool> VerifyLoginAsync(string username, string password)
         {
@@ -43,6 +43,18 @@ namespace LibraryManagementApp.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public Guid GetAuthenticatedUserId()
+        {
+            var userIdClaimPrincipal = (_httpContextAccessor.HttpContext?.User) ?? throw new UnauthorizedAccessException("User ID not found.");
+
+            var userIdClaim = userIdClaimPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+                throw new UnauthorizedAccessException("User ID (Claim) not found or invalid.");
+
+            return userId;
         }
     }
 }

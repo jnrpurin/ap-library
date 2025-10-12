@@ -4,10 +4,11 @@ using LibraryManagementApp.Models;
 
 namespace LibraryManagementApp.Services
 {
-    public class BookLoanService(IBookLoanRepository loanRepository, IBookRepository bookRepository) : IBookLoanService
+    public class BookLoanService(IBookLoanRepository loanRepository, IBookRepository bookRepository, IAuthService authService) : IBookLoanService
     {
         private readonly IBookLoanRepository _loanRepository = loanRepository;
         private readonly IBookRepository _bookRepository = bookRepository;
+        private readonly IAuthService _authService = authService;
 
         public async Task<IEnumerable<BookLoan>> GetAllLoansAsync()
         {
@@ -54,6 +55,12 @@ namespace LibraryManagementApp.Services
                 _loanRepository.Update(loan);
                 await _loanRepository.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<BookLoan>> GetLoansByClient()
+        {
+            Guid customerId = _authService.GetAuthenticatedUserId();
+            return await _loanRepository.GetLoansByClient(customerId);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace LibraryManagementApp.Models
         public bool IsActive { get; set; } = true;
 
         [Required, MaxLength(50)]
-        public UserRole Role { get; set; } = UserRole.Standard;
+        public UserRole Role { get; set; } = UserRole.User_Standard;
 
         public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
         public DateTime UpdateAt { get; set; }

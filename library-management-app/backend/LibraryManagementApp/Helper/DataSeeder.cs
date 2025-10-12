@@ -21,7 +21,7 @@ namespace LibraryManagementApp.Helper
                 Username = "admin",
                 PasswordHash = PasswordHelper.HashPassword("admin!"),
                 Email = "admin@aplibrary.com",
-                Role = UserRole.Admin,
+                Role = UserRole.User_Admin,
                 IsActive = true
             };
 
@@ -30,7 +30,7 @@ namespace LibraryManagementApp.Helper
                 Username = "user",
                 PasswordHash = PasswordHelper.HashPassword("user!"),
                 Email = "user@aplibrary.com",
-                Role = UserRole.Standard,
+                Role = UserRole.User_Standard,
                 IsActive = true
             };
 
@@ -39,7 +39,7 @@ namespace LibraryManagementApp.Helper
                 Username = "viewer",
                 PasswordHash = PasswordHelper.HashPassword("viewer!"),
                 Email = "viewer@aplibrary.com",
-                Role = UserRole.ReadOnly,
+                Role = UserRole.User_ReadOnly,
                 IsActive = true
             };
 

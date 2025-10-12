@@ -9,5 +9,6 @@ namespace LibraryManagementApp.Interfaces
         Task<BookLoan?> GetLoanByIdAsync(Guid id);
         Task<Result<BookLoan>> AddLoanAsync(Guid userId, Guid bookId);
         Task ReturnLoanBookAsync(Guid id);
+        Task<IEnumerable<BookLoan>> GetLoansByClient();
     }
 }

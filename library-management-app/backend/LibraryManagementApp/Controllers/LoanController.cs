@@ -23,6 +23,7 @@ namespace LibraryManagementApp.Controllers
         /// <returns></returns>
         [HttpGet]
         [MapToApiVersion("1.0")]
+        [Authorize(Roles = "User_Admin,User_Standard,User_ReadOnly")]
         public async Task<ActionResult<IEnumerable<BookLoan>>> GetAllLoans()
         {
             var loans = await _loanService.GetAllLoansAsync();
@@ -36,10 +37,24 @@ namespace LibraryManagementApp.Controllers
         /// <returns></returns>
         [HttpGet("{id}")]
         [MapToApiVersion("1.0")]
+        [Authorize(Roles = "User_Admin,User_Standard,User_ReadOnly")]
         public async Task<ActionResult<BookLoan>> GetLoanById(Guid id)
         {
             var loan = await _loanService.GetLoanByIdAsync(id);
             if (loan == null)
+            {
+                return NotFound();
+            }
+            return Ok(loan);
+        }
+
+        [HttpGet()]
+        [MapToApiVersion("1.0")]
+        [Authorize(Roles = "User_Admin,User_Standard,User_ReadOnly,Member_Client")]
+        public async Task<ActionResult<BookLoan>> GetLoansByCustomer()
+        {
+            var loan = await _loanService.GetLoansByClient();
+            if (!loan.Any())
             {
                 return NotFound();
             }
@@ -53,7 +68,7 @@ namespace LibraryManagementApp.Controllers
         /// <returns></returns>
         [HttpPost]
         [MapToApiVersion("1.0")]
-        [Authorize(Roles = "Standard,Admin")]
+        [Authorize(Roles = "User_Admin,User_Standard")]
         public async Task<ActionResult<Book>> CreateBookLoan([FromBody] CreateBookLoanDto createBookLoanDto)
         {
             var result = await _loanService.AddLoanAsync(createBookLoanDto.UserId, createBookLoanDto.BookId);
@@ -84,7 +99,7 @@ namespace LibraryManagementApp.Controllers
         /// <returns></returns>
         [HttpPut("{id}")]
         [MapToApiVersion("1.0")]
-        [Authorize(Roles = "Standard,Admin")]
+        [Authorize(Roles = "User_Admin,User_Standard")]
         public async Task<IActionResult> ReturnBookLoan(Guid id, BookLoan loan)
         {
             if (id != loan.Id)
