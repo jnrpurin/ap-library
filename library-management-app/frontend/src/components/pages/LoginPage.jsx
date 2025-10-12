@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { loginUser } from '../../services/api';
 import '../style/LoginStyle.css';
 
@@ -8,6 +8,14 @@ const LoginPage = ({ onLoginSuccess }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const isMounted = useRef(true); 
+
+    useEffect(() => {
+        return () => {
+            isMounted.current = false;
+        };
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -16,10 +24,15 @@ const LoginPage = ({ onLoginSuccess }) => {
         try {
             const userData = await loginUser(username, password);
             onLoginSuccess(userData); 
+            // console.log('userData:', userData);
         } catch (err) {
-            setError(err);
+            if (isMounted.current) { 
+                setError(err); 
+            }
         } finally {
-            setLoading(false);
+            if (isMounted.current) { 
+                setLoading(false);
+            }
         }
     };
 

@@ -17,7 +17,7 @@ const BookList = ({ roles = [] }) => {
   
   const isAdmin = roles.includes('User_Admin');
   const canLoanOrReturn = isAdmin || roles.includes('Member_Client');
-  
+
   const fetchData = async () => {
     try {
       const data = await getBooks();
@@ -140,11 +140,10 @@ const BookList = ({ roles = [] }) => {
               )}
               {canLoanOrReturn && (
                 <>
-                  {book.isAvailable && (
+                  {book.isAvailable ? (
                     <button className="add-button" onClick={() => handleLoanClick(book)}>Loan book</button>
-                  )}
-                  {!book.isAvailable && (
-                      <button className="edit-button" onClick={() => handleReturnClick(book)}>Return book</button>
+                  ) : (
+                    <button className="edit-button" onClick={() => handleReturnClick(book)}>Return book</button>
                   )}
                 </>
               )}

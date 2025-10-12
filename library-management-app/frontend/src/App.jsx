@@ -7,19 +7,21 @@ const App = () => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-      const token = localStorage.getItem('token');
-      const storedUsername = localStorage.getItem('userName');
-      const storedRolesJSON = localStorage.getItem('roles');      
+      const storedUserToken = localStorage.getItem('userToken');
+      const storedUserName = localStorage.getItem('userName');
+      const storedRolesJSON = localStorage.getItem('userRole');
 
-      if (token && storedUsername && storedRolesJSON) {
-        //setUser({ isAuthenticated: true, roles: [], username: 'Loading...' }); 
+      if (storedUserToken && storedUserName && storedRolesJSON) {
         try {
-          const storedRoles = JSON.parse(storedRolesJSON);
+          let storedRoles = JSON.parse(storedRolesJSON);
+          if (typeof storedRoles === 'string') {
+            storedRoles = [storedRoles];
+          }
           
           setUser({ 
               isAuthenticated: true, 
-              username: storedUsername, 
-              roles: storedRoles
+              userName: storedUserName, 
+              userRole: storedRoles
           });
         } catch (error) {
             console.error("Error:", error);
@@ -29,10 +31,16 @@ const App = () => {
     }, []);
 
     const handleLoginSuccess = (userData ) => {
+      let finalRoles = [];
+      if (typeof userData.roles === 'string') {
+          finalRoles = [userData.roles];
+      } else if (Array.isArray(userData.roles)) {
+          finalRoles = userData.roles;
+      }      
       setUser({
           isAuthenticated: true,
-          username: userData.userName,
-          roles: userData.roles 
+          userName: userData.userName,
+          userRole: finalRoles
       });
     };
 
@@ -44,7 +52,7 @@ const App = () => {
     if (!user || !user.isAuthenticated) {
       return <LoginPage onLoginSuccess={handleLoginSuccess} />;
     }
-
+    
     return (
       <div className="app-container">
         <header className="app-header">
@@ -61,7 +69,7 @@ const App = () => {
             </div>
         </header>
         <main>
-            <BookList roles={user.role} />
+            <BookList roles={user.userRole} />
         </main>
       </div>
     );

@@ -5,7 +5,7 @@ const API_BOOKS_URL = `${BASE_URL}/Books`;
 const API_AUTH_URL = `${BASE_URL}/Login/authenticate`;
 
 axios.interceptors.request.use(config => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('userToken');
     if (token) {
         config.headers.Authorization = `${token}`;
     }
@@ -17,10 +17,10 @@ axios.interceptors.request.use(config => {
 export const loginUser = async (username, password) => {
     try {
         const response = await axios.post(API_AUTH_URL, { username, password });
-        
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userToken', response.data.token);
         localStorage.setItem('userName', response.data.userName);
-        localStorage.setItem('roles', JSON.stringify(response.data.roles));
+        localStorage.setItem('userRole', JSON.stringify(response.data.roles));
+
         return response.data; 
     } catch (error) {
         console.error('Error during login:', error);
@@ -80,7 +80,7 @@ export const deleteBook = async (id) => {
 
 
 export const logoutUser = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('userToken');
     localStorage.removeItem('userName');
-    localStorage.removeItem('roles');    
+    localStorage.removeItem('userRole');    
 };
