@@ -40,21 +40,18 @@ jobs:
       - name: Build solution
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
       
-      # 🛠️ AJUSTE CRÍTICO: Definimos o caminho de saída explicitamente como um arquivo.
-      # O caminho completo do arquivo de cobertura será: 
-      # ./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage.cobertura.xml
+      # O método correto, usando o coletor XPlat Code Coverage (Coverlet Data Collector)
       - name: Run unit tests with coverage
         run: >
-          dotnet test ${{ env.UNIT_TEST_PROJECT_PATH }}
+          dotnet test ./library-management-app/backend/UnitTests/UnitTests.csproj
           --configuration Release
           --no-build
-          --logger "trx;LogFileName=test_results.trx"
-          /p:CollectCoverage=true
-          /p:CoverletOutput=${{ env.TEST_OUTPUT_DIR }}coverage/  # << AJUSTE CRÍTICO: 'coverage/' em vez de 'coverage.'
+          /p:CollectCoverage=true # Esta linha já era usada, mas a próxima é a mais importante
+          --collect:"XPlat Code Coverage" # MUITO IMPORTANTE: Garante o coletor de dados.
+          /p:CoverletOutput=./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/
           /p:CoverletOutputFormat=cobertura
           /p:ExcludeByFile="**/Migrations/*"
           /p:Threshold=70
-          /p:ThresholdType=line # Adicionando tipo para robustez
 
       - name: Set coverage path variables
         id: coverage_path
