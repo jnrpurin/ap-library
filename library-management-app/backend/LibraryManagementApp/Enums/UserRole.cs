@@ -1,5 +1,8 @@
+using System.Text.Json.Serialization;
+
 namespace LibraryManagementApp.Enums
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum UserRole
     {
         User_Admin,

@@ -21,7 +21,7 @@ namespace LibraryManagementApp.Controllers
         /// </summary>
         /// <param name="request">String Username and Password</param>
         /// <returns>Error for invalid data, Ok with the token for valid login</returns>
-        [HttpPost("login")]
+        [HttpPost("authenticate")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
         {
             if (!ModelState.IsValid)
@@ -48,11 +48,8 @@ namespace LibraryManagementApp.Controllers
             {
                 message = "Login successful",
                 token = $"Bearer {token}",
-                user = new
-                {
-                    user.Id,
-                    user.Username
-                }
+                userName = user.Username,
+                roles = user.Role
             });
         }
     }
