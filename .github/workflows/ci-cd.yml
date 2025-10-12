@@ -1,10 +1,10 @@
-name: CI/CD - Tests, Build & Publish Docker
+name: CI/CD - Tests, Coverage, Build & Publish Docker
 
-#on:
-#  push:
-#    branches: [ main ]
-#  pull_request:
-#    branches: [ main ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -12,26 +12,24 @@ permissions:
   id-token: write
 
 env:
-  SOLUTION_PATH: ./backend/LibraryManagementApp.sln
-  BACKEND_CONTEXT: ./backend
-  FRONTEND_CONTEXT: ./frontend
-  BACKEND_DOCKERFILE: ./backend/Dockerfile
-  FRONTEND_DOCKERFILE: ./frontend/Dockerfile
-  # todo: change image names 
-  IMAGE_BACKEND: ${{ secrets.DOCKERHUB_USERNAME }}/library-backend
-  IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/library-frontend
-  DOTNET_VERSION: '8.0.x'
-  NODE_VERSION: '20.x'
+  # ... (suas outras variáveis de ambiente)
+  SOLUTION_PATH: ./library-management-app/backend/LibraryManagementApp.sln
+  UNIT_TEST_PROJECT_PATH: ./library-management-app/backend/UnitTests/UnitTests.csproj
+  BACKEND_CONTEXT: ./library-management-app/backend
+  # ... (outras variáveis)
+  DOTNET_VERSION: '9.0.x'
+  # Nova variável para o diretório base de resultados (onde o Coverlet salva por padrão no CI)
+  TEST_OUTPUT_DIR: ${{ github.workspace }}/library-management-app/backend/UnitTests/bin/Release/net9.0/
 
 jobs:
-  test:
-    name: Restore, Build & Run Unit Tests
+  test-and-coverage:
+    name: Run Unit Tests & Generate Coverage Report
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -41,21 +39,68 @@ jobs:
 
       - name: Build solution
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+      
+      # O método correto, usando o coletor XPlat Code Coverage (Coverlet Data Collector)
+      - name: Run unit tests with coverage
+        run: >
+          dotnet test ./library-management-app/backend/UnitTests/UnitTests.csproj
+          --configuration Release
+          --no-build
+          /p:CollectCoverage=true # Esta linha já era usada, mas a próxima é a mais importante
+          --collect:"XPlat Code Coverage" # MUITO IMPORTANTE: Garante o coletor de dados.
+          /p:CoverletOutput=./library-management-app/backend/UnitTests/bin/Release/net9.0/coverage/
+          /p:CoverletOutputFormat=cobertura
+          /p:ExcludeByFile="**/Migrations/*"
+          /p:Threshold=70
 
-      - name: Run unit tests
-        run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --logger "trx;LogFileName=test_results.trx"
+      - name: Set coverage path variables
+        id: coverage_path
+        run: |
+          # 💡 ATUALIZADO: O arquivo e o relatório de cobertura estão na sub-pasta 'coverage/'
+          echo "COBERTURA_FILE=${{ env.TEST_OUTPUT_DIR }}coverage/coverage.cobertura.xml" >> $GITHUB_ENV
+          echo "REPORT_DIR=${{ env.TEST_OUTPUT_DIR }}coverage/CoverageReport" >> $GITHUB_ENV # << AJUSTADO
+        
+      - name: List coverage output (Debug)
+        # Agora listamos a nova sub-pasta 'coverage/' para verificar se o arquivo existe.
+        run: |
+          echo "Listing files in: ${{ env.TEST_OUTPUT_DIR }}coverage/"
+          ls -R ${{ env.TEST_OUTPUT_DIR }}coverage/ || echo "Directory listing failed or directory not created (expected if empty)" # << AJUSTADO
 
-      - name: Upload test results (for GitHub)
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Create coverage report (HTML)
+        # A nova variável COBERTURA_FILE aponta para o caminho exato e completo.
+        run: >
+          reportgenerator
+          -reports:${{ env.COBERTURA_FILE }}
+          -targetdir:${{ env.REPORT_DIR }}
+          -reporttypes:Html
+        env:
+          PATH: $PATH:/home/runner/.dotnet/tools
+          
+      # 1. Publicar Resultados dos Testes no GitHub (TRX)
+      - name: Upload test results (TRX)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: unit-test-results
           path: '**/TestResults/*.trx'
+          if-no-files-found: warn
+
+      # 2. Publicar Relatório de Cobertura (HTML)
+      - name: Upload coverage report (HTML)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ${{ env.REPORT_DIR }}
+          if-no-files-found: warn
 
   build-and-push:
     name: Build Docker images & Publish
     runs-on: ubuntu-latest
-    needs: test
+    needs: test-and-coverage
     concurrency:
       group: ci-cd-${{ github.ref }}
       cancel-in-progress: true
@@ -82,7 +127,7 @@ jobs:
         with:
           context: ${{ env.BACKEND_CONTEXT }}
           file: ${{ env.BACKEND_DOCKERFILE }}
-          push: ${{ github.ref == 'refs/heads/main' }}        # push only on real main pushes
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: >
             ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
             ${{ env.IMAGE_BACKEND }}:latest
@@ -95,18 +140,9 @@ jobs:
         with:
           context: ${{ env.FRONTEND_CONTEXT }}
           file: ${{ env.FRONTEND_DOCKERFILE }}
-          push: ${{ github.ref == 'refs/heads/main' }}        # push only on real main pushes
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: >
             ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
             ${{ env.IMAGE_FRONTEND }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Show pushed images (info)
-        run: |
-          echo "Backend image: $IMAGE_BACKEND:${GITHUB_SHA}"
-          echo "Frontend image: $IMAGE_FRONTEND:${GITHUB_SHA}"
-        env:
-          IMAGE_BACKEND: ${{ env.IMAGE_BACKEND }}
-          IMAGE_FRONTEND: ${{ env.IMAGE_FRONTEND }}
-          GITHUB_SHA: ${{ github.sha }}

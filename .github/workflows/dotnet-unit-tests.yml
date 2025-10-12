@@ -1,0 +1,45 @@
+name: .NET Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  SOLUTION_PATH: ./library-management-app/backend/LibraryManagementApp.sln
+  UNIT_TEST_PROJECT_PATH: ./library-management-app/backend/UnitTests/UnitTests.csproj
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET 9.x
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.x'
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: Build solution
+      run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore
+
+    - name: Run unit tests
+      run: dotnet test ${{ env.UNIT_TEST_PROJECT_PATH }} --no-build --verbosity normal --logger trx --results-directory "./test-results"
+
+    - name: Publish test results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Test Results
+        path: ./test-results/*.trx
+        reporter: dotnet-trx
+        fail-on-error: true
