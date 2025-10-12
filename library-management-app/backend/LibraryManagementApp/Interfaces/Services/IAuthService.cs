@@ -1,4 +1,3 @@
-using LibraryManagementApp.DTO;
 using LibraryManagementApp.Models;
 
 namespace LibraryManagementApp.Interfaces

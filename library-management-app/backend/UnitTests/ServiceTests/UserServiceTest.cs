@@ -86,7 +86,7 @@ namespace UnitTests.ServiceTests
                 Role = UserRole.Standard
             };
 
-            _userRepositoryMock.Setup(r => r.GetByUsernameAsync(dto.Username)).ReturnsAsync((User)null);
+            _userRepositoryMock.Setup(r => r.GetByUsernameAsync(dto.Username)).ReturnsAsync((User?)null);
             _passwordHasherMock.Setup(p => p.HashPassword(It.IsAny<User>(), dto.Password))
                 .Returns("hashedPassword");
 
@@ -97,7 +97,7 @@ namespace UnitTests.ServiceTests
             Assert.NotNull(result);
             Assert.Equal("newuser", result.Username);
             Assert.Equal("hashedPassword", result.PasswordHash);
-            _userRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<User>()), Times.Once);
+            _userRepositoryMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
             _userRepositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
         }
 
@@ -111,7 +111,7 @@ namespace UnitTests.ServiceTests
 
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.CreateUserAsync(dto));
-            _userRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<User>()), Times.Never);
+            _userRepositoryMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
         }
 
         [Fact]
@@ -141,7 +141,7 @@ namespace UnitTests.ServiceTests
             // Arrange
             var id = Guid.NewGuid();
             var dto = new UpdateUserDTO { Email = "new@mail.com" };
-            _userRepositoryMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((User)null);
+            _userRepositoryMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((User?)null);
 
             // Act
             var result = await _userService.UpdateUserAsync(id, dto);
@@ -174,7 +174,7 @@ namespace UnitTests.ServiceTests
         {
             // Arrange
             var id = Guid.NewGuid();
-            _userRepositoryMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((User)null);
+            _userRepositoryMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((User?)null);
 
             // Act
             var result = await _userService.DeactivateUserAsync(id);

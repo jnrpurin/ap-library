@@ -11,7 +11,7 @@ namespace LibraryManagementApp.Models
         public Book? Book { get; set; }
 
         public DateTime LoanDate { get; set; } = DateTime.UtcNow;
-        public DateTime? ReturnDate { get; set; }
+        public DateTime? ReturnDate { get; set; } = null;
         public bool IsReturned => ReturnDate.HasValue;
     }
 }

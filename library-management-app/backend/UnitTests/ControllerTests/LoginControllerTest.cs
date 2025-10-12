@@ -43,7 +43,7 @@ namespace UnitTests.ControllerTests
         public async Task Login_ShouldReturnUnauthorized_WhenUserNotFound()
         {
             var dto = new LoginRequestDTO { Username = "adm", Password = "123" };
-            _userServiceMock.Setup(s => s.GetUserByUsernameAsync("adm")).ReturnsAsync((User)null);
+            _userServiceMock.Setup(s => s.GetUserByUsernameAsync("adm")).ReturnsAsync((User?)null);
 
             var result = await _controller.Login(dto);
 
@@ -73,7 +73,7 @@ namespace UnitTests.ControllerTests
 
             _userServiceMock.Setup(s => s.GetUserByUsernameAsync("adm")).ReturnsAsync(user);
             _authServiceMock.Setup(a => a.VerifyLoginAsync("adm", "123")).ReturnsAsync(true);
-            _configMock.Setup(c => c["Jwt:Key"]).Returns((string)null);
+            _configMock.Setup(c => c["Jwt:Key"]).Returns(string.Empty);
 
             var result = await _controller.Login(dto);
 
