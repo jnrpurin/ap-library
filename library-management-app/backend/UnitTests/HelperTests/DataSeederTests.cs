@@ -1,7 +1,6 @@
 using LibraryManagementApp.Data;
 using LibraryManagementApp.Helper;
 using LibraryManagementApp.Models;
-using Microsoft.EntityFrameworkCore.InMemory;
 using Microsoft.EntityFrameworkCore;
 
 namespace UnitTests.HelperTests
@@ -28,10 +27,11 @@ namespace UnitTests.HelperTests
 
             // Assert
             var users = await context.Users.ToListAsync();
-            Assert.Equal(3, users.Count);
+            Assert.Equal(4, users.Count);
             Assert.Contains(users, u => u.Username == "admin");
             Assert.Contains(users, u => u.Username == "user");
             Assert.Contains(users, u => u.Username == "viewer");
+            Assert.Contains(users, u => u.Username == "member");
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace UnitTests.HelperTests
             // Assert
             var users = await context.Users.ToListAsync();
             Assert.DoesNotContain(users, u => u.Username == "olduser");
-            Assert.Equal(3, users.Count);
+            Assert.Equal(4, users.Count);
         }
     }
 }
