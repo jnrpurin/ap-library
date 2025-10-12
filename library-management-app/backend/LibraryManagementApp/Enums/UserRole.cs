@@ -2,8 +2,9 @@ namespace LibraryManagementApp.Enums
 {
     public enum UserRole
     {
-        Admin,
-        Standard,
-        ReadOnly
+        User_Admin,
+        User_Standard,
+        User_ReadOnly,
+        Member_Client
     }
 }

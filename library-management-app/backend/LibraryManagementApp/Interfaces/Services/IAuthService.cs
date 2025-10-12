@@ -6,5 +6,6 @@ namespace LibraryManagementApp.Interfaces
     {
         Task<bool> VerifyLoginAsync(string username, string password);
         string GenerateJwtToken(User user, string secretKey, string issuer, string audience);
+        Guid GetAuthenticatedUserId();
     }
 }

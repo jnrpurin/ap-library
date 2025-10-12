@@ -21,7 +21,7 @@ namespace LibraryManagementApp.Controllers
         /// </summary>
         /// <returns>Ok with the users</returns>
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "User_Admin")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsersAsync();
@@ -34,7 +34,7 @@ namespace LibraryManagementApp.Controllers
         /// <param name="id">Guid identificator</param>
         /// <returns>Ok with the user if exists</returns>
         [HttpGet("{id:guid}")]
-        [Authorize(Roles = "Standard,Admin")]
+        [Authorize(Roles = "User_Admin,User_Standard")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -48,7 +48,7 @@ namespace LibraryManagementApp.Controllers
         /// <param name="dto">Strings Username, Password and Email, FullName is optional</param>
         /// <returns>OK if success or BadRequest if failed to register</returns>
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "User_Admin")]
         public async Task<IActionResult> Create([FromBody] RegisterRequestDTO dto)
         {
             var user = await _userService.CreateUserAsync(dto);
@@ -62,7 +62,7 @@ namespace LibraryManagementApp.Controllers
         /// <param name="dto">User email, full name, role and if it is active</param>
         /// <returns>Ok with the user updated data</returns>
         [HttpPut("{id:guid}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "User_Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserDTO dto)
         {
             var updated = await _userService.UpdateUserAsync(id, dto);
@@ -76,7 +76,7 @@ namespace LibraryManagementApp.Controllers
         /// <param name="id">User guid id</param>
         /// <returns>Ok for deactivated user</returns>
         [HttpPatch("{id:guid}/deactivate")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "User_Admin")]
         public async Task<IActionResult> Deactivate(Guid id)
         {
             var result = await _userService.DeactivateUserAsync(id);

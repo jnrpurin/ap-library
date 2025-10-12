@@ -6,18 +6,22 @@ using LibraryManagementApp.Models;
 using LibraryManagementApp.Services;
 using LibraryManagementApp.Enums;
 using Moq;
+using Microsoft.AspNetCore.Http;
 
 namespace UnitTests.ServiceTests
 {
     public class AuthServiceTests
     {
         private readonly Mock<IUserRepository> _userRepositoryMock;
+        private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        
         private readonly AuthService _authService;
 
         public AuthServiceTests()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-            _authService = new AuthService(_userRepositoryMock.Object);
+            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _authService = new AuthService(_userRepositoryMock.Object, _httpContextAccessorMock.Object);
         }
 
         [Fact]
@@ -44,7 +48,7 @@ namespace UnitTests.ServiceTests
                 Username = "adm",
                 PasswordHash = PasswordHelper.HashPassword("123"),
                 Email = "email@email.com",
-                Role = UserRole.Admin
+                Role = UserRole.User_Admin
             };
 
             _userRepositoryMock.Setup(r => r.GetByUsernameAsync("adm"))
@@ -67,7 +71,7 @@ namespace UnitTests.ServiceTests
                 Username = "adm",
                 PasswordHash = PasswordHelper.HashPassword("123"),
                 Email = "email@email.com",
-                Role = UserRole.Admin
+                Role = UserRole.User_Admin
             };
 
             _userRepositoryMock.Setup(r => r.GetByUsernameAsync("adm"))
@@ -90,7 +94,7 @@ namespace UnitTests.ServiceTests
                 Id = Guid.NewGuid(),
                 Username = "adm",
                 Email = "email@email.com",
-                Role = UserRole.Admin,
+                Role = UserRole.User_Admin,
                 PasswordHash = string.Empty 
             };
 
@@ -110,7 +114,7 @@ namespace UnitTests.ServiceTests
             // Validate claims
             Assert.Equal("adm", token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value);
             Assert.Equal(user.Id.ToString(), token.Claims.FirstOrDefault(c => c.Type == "userId")?.Value);
-            Assert.Equal("Admin", token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value);
+            Assert.Equal(UserRole.User_Admin.ToString(), token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value);
 
             // Validate issuer and audience
             Assert.Equal(issuer, token.Issuer);
@@ -124,7 +128,7 @@ namespace UnitTests.ServiceTests
         public void GenerateJwtToken_ShouldThrow_WhenSecretKeyInvalid()
         {
             // Arrange
-            var user = new User { Id = Guid.NewGuid(), Username = "test", Email = "email@email.com", Role = UserRole.Admin, PasswordHash = string.Empty };
+            var user = new User { Id = Guid.NewGuid(), Username = "test", Email = "email@email.com", Role = UserRole.User_Admin, PasswordHash = string.Empty };
             var invalidKey = "";
 
             // Act & Assert

@@ -27,8 +27,8 @@ namespace UnitTests.ServiceTests
             // Arrange
             var users = new List<User>
             {
-                new() { Id = Guid.NewGuid(), Username = "user1", PasswordHash = "123", Email = "email@mail.com", Role = UserRole.Standard  },
-                new() { Id = Guid.NewGuid(), Username = "user2", PasswordHash = "1234", Email = "email2@mail.com", Role = UserRole.Admin  }
+                new() { Id = Guid.NewGuid(), Username = "user1", PasswordHash = "123", Email = "email@mail.com", Role = UserRole.User_Standard  },
+                new() { Id = Guid.NewGuid(), Username = "user2", PasswordHash = "1234", Email = "email2@mail.com", Role = UserRole.User_Admin  }
             };
             _userRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(users);
 
@@ -45,7 +45,7 @@ namespace UnitTests.ServiceTests
         public async Task GetUserByUsernameAsync_ShouldReturnUser_WhenExists()
         {
             // Arrange
-            var expectedUser = new User { Id = Guid.NewGuid(), Username = "adm", PasswordHash = "123", Email = "email@mail.com", Role = UserRole.Standard  };
+            var expectedUser = new User { Id = Guid.NewGuid(), Username = "adm", PasswordHash = "123", Email = "email@mail.com", Role = UserRole.User_Standard  };
             _userRepositoryMock.Setup(r => r.GetByUsernameAsync("adm")).ReturnsAsync(expectedUser);
 
             // Act
@@ -62,7 +62,7 @@ namespace UnitTests.ServiceTests
         {
             // Arrange
             var id = Guid.NewGuid();
-            var expectedUser = new User { Id = id, Username = "user1", PasswordHash = "123", Email = "email@mail.com", Role = UserRole.Standard };
+            var expectedUser = new User { Id = id, Username = "user1", PasswordHash = "123", Email = "email@mail.com", Role = UserRole.User_Standard };
             _userRepositoryMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(expectedUser);
 
             // Act
@@ -83,7 +83,7 @@ namespace UnitTests.ServiceTests
                 Username = "newuser",
                 Password = "123",
                 Email = "test@email.com",
-                Role = UserRole.Standard
+                Role = UserRole.User_Standard
             };
 
             _userRepositoryMock.Setup(r => r.GetByUsernameAsync(dto.Username)).ReturnsAsync((User?)null);
@@ -105,9 +105,9 @@ namespace UnitTests.ServiceTests
         public async Task CreateUserAsync_ShouldThrow_WhenUsernameAlreadyExists()
         {
             // Arrange
-            var dto = new RegisterRequestDTO { Username = "adm", Password = "123", Email = "email@mail.com", Role = UserRole.Standard };
+            var dto = new RegisterRequestDTO { Username = "adm", Password = "123", Email = "email@mail.com", Role = UserRole.User_Standard };
             _userRepositoryMock.Setup(r => r.GetByUsernameAsync(dto.Username))
-                .ReturnsAsync(new User { Username = "adm", Email = "email@mail.com", Role = UserRole.Standard, PasswordHash = string.Empty });
+                .ReturnsAsync(new User { Username = "adm", Email = "email@mail.com", Role = UserRole.User_Standard, PasswordHash = string.Empty });
 
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.CreateUserAsync(dto));
@@ -119,8 +119,8 @@ namespace UnitTests.ServiceTests
         {
             // Arrange
             var id = Guid.NewGuid();
-            var user = new User { Id = id, Username = "olduser", Email = "old@mail.com", Role = UserRole.Admin, PasswordHash = string.Empty  };
-            var dto = new UpdateUserDTO { Email = "new@mail.com", FullName = "New Name", Role = UserRole.Admin, IsActive = true };
+            var user = new User { Id = id, Username = "olduser", Email = "old@mail.com", Role = UserRole.User_Admin, PasswordHash = string.Empty  };
+            var dto = new UpdateUserDTO { Email = "new@mail.com", FullName = "New Name", Role = UserRole.User_Admin, IsActive = true };
 
             _userRepositoryMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(user);
 
@@ -156,7 +156,7 @@ namespace UnitTests.ServiceTests
         {
             // Arrange
             var id = Guid.NewGuid();
-            var user = new User { Id = id, Username = "teste", IsActive = true, Email = "email@email.com", Role = UserRole.Admin, PasswordHash = string.Empty  };
+            var user = new User { Id = id, Username = "teste", IsActive = true, Email = "email@email.com", Role = UserRole.User_Admin, PasswordHash = string.Empty  };
             _userRepositoryMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(user);
 
             // Act

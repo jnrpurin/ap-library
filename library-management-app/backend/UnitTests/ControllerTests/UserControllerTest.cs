@@ -60,7 +60,7 @@ namespace UnitTests.ControllerTests
         [Fact]
         public async Task Create_ShouldReturnCreatedAtAction()
         {
-            var dto = new RegisterRequestDTO { Username = "adm", Password = "123", Email = "adm@adm.com", Role = LibraryManagementApp.Enums.UserRole.Admin };
+            var dto = new RegisterRequestDTO { Username = "adm", Password = "123", Email = "adm@adm.com", Role = LibraryManagementApp.Enums.UserRole.User_Admin };
             var user = new User { Id = Guid.NewGuid(), Username = "adm", Email = "adm@adm.com", PasswordHash = "123" };
 
             _userServiceMock.Setup(s => s.CreateUserAsync(dto)).ReturnsAsync(user);

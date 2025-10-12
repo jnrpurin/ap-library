@@ -11,10 +11,16 @@ namespace LibraryManagementApp.Repositories
         {
         }
 
-        public async Task<IEnumerable<BookLoan>> GetActiveLoansByUserAsync(int userId)
+        public async Task<IEnumerable<BookLoan>> GetActiveLoansByUserAsync(Guid userId)
+        {
+            var loans = await GetLoansByClient(userId);
+            return loans.Where(bl => bl.ReturnDate == null);
+        }
+
+        public async Task<IEnumerable<BookLoan>> GetLoansByClient(Guid clientUserId)
         {
             return await _context.BookLoans
-                .Where(bl => bl.UserId.Equals(userId) && bl.ReturnDate == null)
+                .Where(bl => bl.UserId == clientUserId)
                 .Include(bl => bl.User)
                 .Include(bl => bl.Book)
                 .ToListAsync();
