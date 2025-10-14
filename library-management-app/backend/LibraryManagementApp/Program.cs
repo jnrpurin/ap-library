@@ -43,6 +43,11 @@ builder.Services.AddApiVersion();
 
 builder.Services.AddHttpContextAccessor();
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080);
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -63,7 +68,7 @@ if (app.Environment.IsDevelopment())
     await DataSeeder.SeedUsersAsync(dbContext);
 }
 
-app.UseHttpsRedirection();
+    //app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowFrontendApp");
 
