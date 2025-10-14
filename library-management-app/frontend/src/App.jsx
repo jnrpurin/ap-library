@@ -58,7 +58,7 @@ const App = () => {
         <header className="app-header">
             <h1>📚 AP Library</h1>
             <div style={{ position: 'absolute', top: 20, right: 40, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '14px', color: '#636366' }}>Hi, {user.username}!</span>
+                <span style={{ fontSize: '14px', color: '#636366' }}>Hi, {user.userName}!</span>
                 <button 
                     className="delete-button"
                     onClick={handleLogout}

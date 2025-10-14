@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://localhost:7100/api/v1';
-const API_BOOKS_URL = `${BASE_URL}/Books`;
-const API_AUTH_URL = `${BASE_URL}/Login/authenticate`;
+const API_BASE_URL = "http://localhost:8080/api/v1";
+const BASE_URL = 'http://backend:8080/api/v1';
+const API_BOOKS_URL = `${API_BASE_URL}/Books`;
+const API_AUTH_URL = `${API_BASE_URL}/Login/authenticate`;
 
 axios.interceptors.request.use(config => {
     const token = localStorage.getItem('userToken');
