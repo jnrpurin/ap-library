@@ -11,10 +11,14 @@ using LibraryManagementApp.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("http://0.0.0.0:8080");
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendApp",
-        policy => policy.WithOrigins("http://localhost:3000")
+        policy => policy.WithOrigins(
+                            "http://localhost:3000",
+                            "http://frontend"
+                        )
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
@@ -63,9 +67,26 @@ if (app.Environment.IsDevelopment())
     await DataSeeder.SeedUsersAsync(dbContext);
 }
 
-app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowFrontendApp");
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"Request: {context.Request.Method} {context.Request.Path}");
+    await next();
+    Console.WriteLine($"Response Status: {context.Response.StatusCode}");
+});
+
+app.UseExceptionHandler(errApp =>
+{
+    errApp.Run(async context =>
+    {
+        var error = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
+        Console.WriteLine($"Exception: {error}");
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsync("Internal server error");
+    });
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

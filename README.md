@@ -58,18 +58,26 @@ Follow these simple steps to make the project work on your computer:
 
    This will create the tables automatically in your database.
 
-5. **Run the backend**  
-   Click the Run button in Visual Studio to start the backend API. Into VS code you can go via teminal window and type ´dotnet run´
+5. **Run the backend + frontend**  
+   Click the Run button in Visual Studio to start the backend API. Into VS code you can go via teminal window and type `dotnet run`
    You should see messages like "Application started. Listening on..." — that means it’s running!
 
-6. **Run the frontend**  
    Open a new terminal (Command Prompt or PowerShell), go to the folder frontend, and type:
    ```
    npm install
    npm start
    ```
 
-   This will download everything the frontend needs and open the website in your browser (usually at http://localhost:3000).
+   This will download everything the frontend needs and open the website in your browser (at `http://localhost:3000`).
+
+6. **Run via Docker containers**  
+   To run the full-stack application (MySQL database, .NET backend, and Node.js/Nginx frontend), you must have Docker and Docker Compose installed. Navigate to the root directory containing the docker-compose.yml file, and simply execute the following command:
+   ```
+   docker-compose up --build -d
+   ```
+   
+   This command will build the frontend and backend images, start the MySQL database, wait for the database to become healthy, and then launch the backend and frontend services. Once all containers are running, the frontend will be accessible at `http://localhost:3000`.
+   Or you can use the script startAllApp.ps1, just typing into a powershell prompt: `.\startAllApp.ps1`.
 
 7. **Test it out!**  
    Try logging in, adding books, and managing loans — your library system should be up and running!
@@ -77,6 +85,7 @@ Follow these simple steps to make the project work on your computer:
 
 ## Next Steps
 
+- Set up the method to allow loans on frontend.
 - The next improvements planned for this project include adding monitoring and observability through application logs.
 - Implementing integration tests for the repository layer, and creating middleware tests focused on authentication and JWT validation.  
 - Additionally, unit tests will be added for helpers and extensions, along with frontend test coverage.  

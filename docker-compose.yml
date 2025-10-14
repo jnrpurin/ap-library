@@ -1,31 +1,7 @@
-version: "3.9"
-
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: library-backend
-    ports:
-      - "8080:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      - db
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: library-frontend
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-
   db:
     image: mysql:8.0
-    container_name: library-db
+    container_name: db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -34,6 +10,48 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 15s
+      retries: 10      
+
+  backend:
+    build:
+      context: ./library-management-app/backend
+      dockerfile: Dockerfile
+    container_name: library-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development 
+      - ASPNETCORE_URLS=http://+:8080
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ap-library-db;User=root;Password=root;
+    depends_on:
+      db:
+        condition: service_healthy      
+    networks:
+      - app-network      
+
+  frontend:
+    build:
+      context: ./library-management-app/frontend
+      dockerfile: Dockerfile
+    container_name: library-frontend
+    ports:
+      - "3000:3000"   
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   db_data:

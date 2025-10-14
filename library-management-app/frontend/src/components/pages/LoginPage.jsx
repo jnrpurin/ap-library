@@ -23,8 +23,8 @@ const LoginPage = ({ onLoginSuccess }) => {
 
         try {
             const userData = await loginUser(username, password);
+            console.log('userData:', userData);
             onLoginSuccess(userData); 
-            // console.log('userData:', userData);
         } catch (err) {
             if (isMounted.current) { 
                 setError(err); 
