@@ -1,6 +1,8 @@
 # Library Management App
 
 This project is a library management application developed using ASP.NET for the backend and React for the frontend. The application follows the MVC 4.0 standard and uses a clean architecture, applying SOLID principles.
+For more details, see the [Simple System Design](https://github.com/jnrpurin/ap-library/wiki/Simple-System-Desing).
+
 
 ## Project
 
