@@ -13,9 +13,16 @@ namespace LibraryManagementApp.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
-    public class LoanController(IBookLoanService loanService) : ControllerBase
+    public class LoanController : ControllerBase
     {
-        private readonly IBookLoanService _loanService = loanService;
+        private readonly IBookLoanService _loanService;
+        private readonly ILogger<LoanController> _logger;
+
+        public LoanController(IBookLoanService loanService, ILogger<LoanController> logger)
+        {
+            _loanService = loanService;
+            _logger = logger;
+        }
 
         /// <summary>
         /// Method to get all loans.
@@ -26,6 +33,7 @@ namespace LibraryManagementApp.Controllers
         [Authorize(Roles = "User_Admin,User_Standard,User_ReadOnly")]
         public async Task<ActionResult<IEnumerable<BookLoan>>> GetAllLoans()
         {
+            _logger.LogInformation("Fetching all book loans...");
             var loans = await _loanService.GetAllLoansAsync();
             return Ok(loans);
         }
@@ -40,9 +48,11 @@ namespace LibraryManagementApp.Controllers
         [Authorize(Roles = "User_Admin,User_Standard,User_ReadOnly")]
         public async Task<ActionResult<BookLoan>> GetLoanById(Guid id)
         {
+            _logger.LogInformation("Fetching loan with ID: {LoanId}", id);
             var loan = await _loanService.GetLoanByIdAsync(id);
             if (loan == null)
             {
+                _logger.LogWarning("Loan with ID {LoanId} not found", id);
                 return NotFound();
             }
             return Ok(loan);
@@ -57,9 +67,11 @@ namespace LibraryManagementApp.Controllers
         [Authorize(Roles = "User_Admin,User_Standard,User_ReadOnly,Member_Client")]
         public async Task<ActionResult<BookLoan>> GetLoansByCustomer()
         {
+            _logger.LogInformation("Fetching loans by authenticated customer...");
             var loan = await _loanService.GetLoansByClient();
             if (!loan.Any())
             {
+                _logger.LogWarning("No loans found for the current customer");
                 return NotFound();
             }
             return Ok(loan);
@@ -68,31 +80,46 @@ namespace LibraryManagementApp.Controllers
         /// <summary>
         /// New loan creation method.
         /// </summary>
-        /// <param name="createBookLoanDto"></param>
+        /// <param name="dto"></param>
         /// <returns></returns>
         [HttpPost]
         [MapToApiVersion("1.0")]
         [Authorize(Roles = "User_Admin,User_Standard")]
-        public async Task<ActionResult<Book>> CreateBookLoan([FromBody] CreateBookLoanDto createBookLoanDto)
+        public async Task<ActionResult<Book>> CreateBookLoan([FromBody] CreateBookLoanDto dto)
         {
-            var result = await _loanService.AddLoanAsync(createBookLoanDto.UserId, createBookLoanDto.BookId);
-            if (!result.IsSuccess)
-                return BadRequest(result.ErrorMessage);
-            
-            var loan = result.Data!;
-            var loanDto = new BookLoanDto
+            try
             {
-                Id = loan.Id,
-                UserId = loan.UserId,
-                UserName = loan.User?.Username ?? "",
-                BookId = loan.BookId,
-                BookTitle = loan.Book?.Title ?? "",
-                LoanDate = loan.LoanDate,
-                ReturnDate = loan.ReturnDate,
-                IsReturned = loan.IsReturned
-            };
+                _logger.LogInformation("Creating new loan: User={UserId}, Book={BookId}", dto.UserId, dto.BookId);
+                var result = await _loanService.AddLoanAsync(dto.UserId, dto.BookId);
 
-            return CreatedAtAction(nameof(GetLoanById), new { id = loan.Id }, loanDto);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning("Failed to create loan: {Error}", result.ErrorMessage);
+                    return BadRequest(result.ErrorMessage);
+                }
+
+                var loan = result.Data!;
+                _logger.LogInformation("Loan {LoanId} created successfully", loan.Id);
+
+                var loanDto = new BookLoanDto
+                {
+                    Id = loan.Id,
+                    UserId = loan.UserId,
+                    UserName = loan.User?.Username ?? "",
+                    BookId = loan.BookId,
+                    BookTitle = loan.Book?.Title ?? "",
+                    LoanDate = loan.LoanDate,
+                    ReturnDate = loan.ReturnDate,
+                    IsReturned = loan.IsReturned
+                };
+
+                return CreatedAtAction(nameof(GetLoanById), new { id = loan.Id }, loanDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating new loan for User={UserId}, Book={BookId}", dto.UserId, dto.BookId);
+                return StatusCode(500, "An internal error occurred while creating the loan.");
+            }
         }
 
         /// <summary>
@@ -108,11 +135,21 @@ namespace LibraryManagementApp.Controllers
         {
             if (id != loan.Id)
             {
+                _logger.LogWarning("Loan ID mismatch: route={IdRoute}, body={IdBody}", id, loan.Id);
                 return BadRequest();
             }
 
-            await _loanService.ReturnLoanBookAsync(loan.Id);
-            return Ok();
+            try
+            {
+                await _loanService.ReturnLoanBookAsync(loan.Id);
+                _logger.LogInformation("Loan {LoanId} marked as returned", id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error returning loan {LoanId}", id);
+                return StatusCode(500, "An internal error occurred while returning the loan.");
+            }
         }
     }
 }

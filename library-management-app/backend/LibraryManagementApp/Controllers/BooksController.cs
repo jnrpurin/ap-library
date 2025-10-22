@@ -12,9 +12,16 @@ namespace LibraryManagementApp.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
-    public class BooksController(IBookService bookService) : ControllerBase
+    public class BooksController : ControllerBase
     {
-        private readonly IBookService _bookService = bookService;
+        private readonly IBookService _bookService;
+        private readonly ILogger<BooksController> _logger;
+
+        public BooksController(IBookService bookService, ILogger<BooksController> logger)
+        {
+            _bookService = bookService;
+            _logger = logger;
+        }
 
         /// <summary>
         /// Method to get all books.
@@ -24,6 +31,7 @@ namespace LibraryManagementApp.Controllers
         [MapToApiVersion("1.0")]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
+            _logger.LogInformation("Fetching all books...");
             var books = await _bookService.GetAllBooksAsync();
             return Ok(books);
         }
@@ -37,9 +45,12 @@ namespace LibraryManagementApp.Controllers
         [MapToApiVersion("1.0")]
         public async Task<ActionResult<Book>> GetBookById(Guid id)
         {
+            _logger.LogInformation("Fetching book with ID: {BookId}", id);
+
             var book = await _bookService.GetBookByIdAsync(id);
             if (book == null)
             {
+                _logger.LogWarning("Book with ID {BookId} not found", id);
                 return NotFound();
             }
             return Ok(book);
@@ -55,8 +66,18 @@ namespace LibraryManagementApp.Controllers
         [Authorize(Roles = "User_Admin,User_Standard")]
         public async Task<ActionResult<Book>> CreateBook(Book book)
         {
-            await _bookService.AddBookAsync(book);
-            return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
+            try
+            {
+                _logger.LogInformation("Creating a new book: {Title}", book.Title);
+                await _bookService.AddBookAsync(book);
+                _logger.LogInformation("Book created successfully with ID: {BookId}", book.Id);
+                return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating book {Title}", book.Title);
+                return StatusCode(500, "An internal error occurred while creating the book.");
+            }
         }
 
         /// <summary>
@@ -72,11 +93,21 @@ namespace LibraryManagementApp.Controllers
         {
             if (id != book.Id)
             {
+                _logger.LogWarning("Book ID mismatch: route={IdRoute}, body={IdBody}", id, book.Id);
                 return BadRequest();
             }
 
-            await _bookService.UpdateBookAsync(book);
-            return Ok();
+            try
+            {
+                await _bookService.UpdateBookAsync(book);
+                _logger.LogInformation("Book {BookId} updated successfully", id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating book {BookId}", id);
+                return StatusCode(500, "An internal error occurred while updating the book.");
+            }
         }
 
         /// <summary>
@@ -89,8 +120,17 @@ namespace LibraryManagementApp.Controllers
         [Authorize(Roles = "User_Admin")]
         public async Task<IActionResult> DeleteBook(Guid id)
         {
-            await _bookService.DeleteBookAsync(id);
-            return Ok();
+            try
+            {
+                await _bookService.DeleteBookAsync(id);
+                _logger.LogInformation("Book {BookId} deleted successfully", id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting book {BookId}", id);
+                return StatusCode(500, "An internal error occurred while deleting the book.");
+            }
         }
     }
 }
