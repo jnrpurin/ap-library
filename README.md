@@ -33,7 +33,12 @@ For more details, see the [Simple System Design](https://github.com/jnrpurin/ap-
 
 Follow these simple steps to make the project work on your computer:
 
-1. **Run the App**  
+1. **Download the project**  
+   Go to the GitHub page and click on **Code → Download ZIP**, then unzip the file somewhere on your computer.  
+   (If you know how to use Git, you can also run:  
+   `git clone https://github.com/jnrpurin/ap-library.git`)
+
+2. **Run the App**  
    To run the full-stack application (MySQL database, .NET backend, and Node.js/Nginx frontend), you must have Docker and Docker Compose installed. Navigate to the root directory containing the docker-compose.yml file, and simply execute the following command:
    ```
    docker-compose up --build -d
