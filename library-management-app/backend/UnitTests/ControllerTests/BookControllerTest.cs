@@ -2,6 +2,7 @@ using LibraryManagementApp.Controllers;
 using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace UnitTests.ControllerTests
@@ -9,12 +10,14 @@ namespace UnitTests.ControllerTests
     public class BooksControllerTests
     {
         private readonly Mock<IBookService> _bookServiceMock;
+        private readonly Mock<ILogger<BooksController>> _logger;
         private readonly BooksController _controller;
 
         public BooksControllerTests()
         {
             _bookServiceMock = new Mock<IBookService>();
-            _controller = new BooksController(_bookServiceMock.Object);
+            _logger = new Mock<ILogger<BooksController>>();
+            _controller = new BooksController(_bookServiceMock.Object, _logger.Object);
         }
 
         [Fact]

@@ -1,14 +1,12 @@
-using System;
 using System.Text.Json;
-using System.Threading.Tasks;
 using LibraryManagementApp.Controllers;
 using LibraryManagementApp.DTO;
 using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 namespace UnitTests.ControllerTests
 {
@@ -17,6 +15,7 @@ namespace UnitTests.ControllerTests
         private readonly Mock<IAuthService> _authServiceMock;
         private readonly Mock<IUserService> _userServiceMock;
         private readonly Mock<IConfiguration> _configMock;
+        private readonly Mock<ILogger<LoginController>> _logger;
         private readonly LoginController _controller;
 
         public LoginControllerTests()
@@ -24,8 +23,8 @@ namespace UnitTests.ControllerTests
             _authServiceMock = new Mock<IAuthService>();
             _userServiceMock = new Mock<IUserService>();
             _configMock = new Mock<IConfiguration>();
-
-            _controller = new LoginController(_authServiceMock.Object, _userServiceMock.Object, _configMock.Object);
+            _logger = new Mock<ILogger<LoginController>>();
+            _controller = new LoginController(_authServiceMock.Object, _userServiceMock.Object, _configMock.Object, _logger.Object);
         }
 
         [Fact]

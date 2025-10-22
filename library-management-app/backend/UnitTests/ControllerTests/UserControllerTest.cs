@@ -4,6 +4,7 @@ using LibraryManagementApp.DTO;
 using LibraryManagementApp.Interfaces;
 using LibraryManagementApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace UnitTests.ControllerTests
@@ -11,12 +12,14 @@ namespace UnitTests.ControllerTests
     public class UsersControllerTests
     {
         private readonly Mock<IUserService> _userServiceMock;
+        private readonly Mock<ILogger<UsersController>> _logger;
         private readonly UsersController _controller;
 
         public UsersControllerTests()
         {
             _userServiceMock = new Mock<IUserService>();
-            _controller = new UsersController(_userServiceMock.Object);
+            _logger = new Mock<ILogger<UsersController>>();
+            _controller = new UsersController(_userServiceMock.Object, _logger.Object);
         }
 
         [Fact]
