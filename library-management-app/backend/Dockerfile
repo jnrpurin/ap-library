@@ -15,8 +15,15 @@ RUN dotnet publish -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
-EXPOSE 8080
 
-ENV ASPNETCORE_URLS=http://+:8080
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+RUN chown -R appuser:appgroup /app
+
+ENV ASPNETCORE_URLS=http://+:8085
+ENV ASPNETCORE_ENVIRONMENT=Development
+
+EXPOSE 8085
+
+USER appuser
 
 ENTRYPOINT ["dotnet", "LibraryManagementApp.dll"]

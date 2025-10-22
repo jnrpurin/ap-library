@@ -13,10 +13,11 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 15s
-      retries: 10      
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
 
   backend:
     build:
@@ -24,17 +25,18 @@ services:
       dockerfile: Dockerfile
     container_name: library-backend
     ports:
-      - "8080:8080"
+      - "8085:8085"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development 
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=http://+:8085
       - DOTNET_RUNNING_IN_CONTAINER=true
       - ConnectionStrings__DefaultConnection=Server=db;Database=ap-library-db;User=root;Password=root;
     depends_on:
       db:
-        condition: service_healthy      
+        condition: service_healthy
     networks:
-      - app-network      
+      - app-network
+    restart: on-failure
 
   frontend:
     build:
@@ -42,12 +44,11 @@ services:
       dockerfile: Dockerfile
     container_name: library-frontend
     ports:
-      - "3000:3000"   
+      - "80:8081"   
     depends_on:
       - backend
     networks:
       - app-network
-
 
 networks:
   app-network:
@@ -55,4 +56,3 @@ networks:
 
 volumes:
   db_data:
-  
