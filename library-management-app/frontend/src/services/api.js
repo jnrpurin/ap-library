@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = "http://localhost:8080/api/v1";
-const BASE_URL = 'http://backend:8080/api/v1';
+const API_BASE_URL = '/api/v1';
 const API_BOOKS_URL = `${API_BASE_URL}/Books`;
 const API_AUTH_URL = `${API_BASE_URL}/Login/authenticate`;
 
@@ -38,7 +37,6 @@ export const getBooks = async () => {
         throw error;
     }
 };
-
 
 export const getBookById = async (id) => {
     try {
@@ -78,7 +76,6 @@ export const deleteBook = async (id) => {
         throw error;
     }
 };
-
 
 export const logoutUser = () => {
     localStorage.removeItem('userToken');

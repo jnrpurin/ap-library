@@ -11,13 +11,14 @@ using LibraryManagementApp.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("http://0.0.0.0:8080");
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendApp",
         policy => policy.WithOrigins(
-                            "http://localhost:3000",
-                            "http://frontend"
+                            "http://localhost",
+                            "http://localhost:80",
+                            "http://frontend",
+                            "http://frontend:8081"
                         )
                         .AllowAnyMethod()
                         .AllowAnyHeader()
@@ -40,7 +41,7 @@ builder.Services.AddScoped<IBookLoanService, BookLoanService>();
 
 var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connStr, ServerVersion.AutoDetect(connStr)));
+    options.UseMySql(connStr, new MySqlServerVersion(new Version(8, 0, 44))));
 
 builder.Services.AddControllers();
 builder.Services.AddApiVersion();
